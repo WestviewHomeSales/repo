@@ -27,8 +27,14 @@ export const SoldPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
+      console.log('Loading sold properties...');
+      
       const data = await fetchSoldProperties();
+      console.log('Raw data from Supabase:', data);
+      
       const mappedProperties = data.map(mapSoldPropertyToProperty);
+      console.log('Mapped properties:', mappedProperties);
+      
       setSoldProperties(mappedProperties);
       sortProperties(mappedProperties, 'date-new');
     } catch (err) {
@@ -88,7 +94,7 @@ export const SoldPage: React.FC = () => {
     return (
       <div className="container mx-auto px-4 py-6 md:py-10">
         <div className="flex justify-center items-center min-h-64">
-          <div className="text-lg text-gray-600">Loading sold properties...</div>
+          <div className="text-lg text-gray-600">Loading sold properties from Supabase...</div>
         </div>
       </div>
     );
@@ -189,8 +195,14 @@ export const SoldPage: React.FC = () => {
 
         {soldProperties.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">No sold properties found.</p>
-            <p className="text-gray-500 text-sm mt-2">Please check back later or contact us for more information.</p>
+            <p className="text-gray-600 text-lg">No sold properties found in Supabase.</p>
+            <p className="text-gray-500 text-sm mt-2">Check the browser console for connection details.</p>
+            <button 
+              onClick={loadSoldProperties}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              Retry Loading
+            </button>
           </div>
         ) : (
           <>
