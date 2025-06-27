@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bed, Bath, Square, Calendar, MapPin } from 'lucide-react';
+import { Bed, Bath, Square, MapPin } from 'lucide-react';
 import { Property } from '../types/property';
 import { formatPrice } from '../utils/formatters';
 
@@ -125,19 +125,6 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
             <span className="text-xs text-gray-500 uppercase tracking-wide">Sq Ft</span>
           </div>
         </div>
-
-        {/* Show date and price per sq ft only for current listings, not sold properties */}
-        {!isSoldPage && (
-          <div className="flex justify-between items-center text-sm text-gray-600 mb-4">
-            <div className="flex items-center">
-              <Calendar size={14} className="mr-1" />
-              <span>
-                Listed: {new Date(property.listedDate).toLocaleDateString()}
-              </span>
-            </div>
-            <span className="font-medium">${property.pricePerSqFt}/sq ft</span>
-          </div>
-        )}
 
         {/* Show listed by and floor plan only for current listings, not sold properties */}
         {!isSoldPage && (
