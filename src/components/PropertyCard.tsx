@@ -63,8 +63,8 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
   const formatListedDate = (dateString: string): string => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
-      month: 'numeric',
-      day: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
       year: 'numeric'
     });
   };
@@ -84,7 +84,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
         {/* Show date listed in green tag on Current Listings page */}
         {!isSoldPage && (
           <div className="absolute top-4 left-4 bg-green-600 text-white px-2 py-1 rounded text-xs font-medium">
-            Listed: {formatListedDate(property.listedDate)}
+            {formatListedDate(property.listedDate)}
           </div>
         )}
         {/* Show sold date in green tag on Sold page */}
@@ -140,26 +140,34 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
           </div>
         </div>
 
-        {/* Show listed by and floor plan only for current listings, not sold properties */}
+        {/* Current Listings page layout */}
         {!isSoldPage && (
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">
-              Listed by: <span className="font-medium">{property.listedBy}</span>
-            </span>
-            {showFloorPlanButton && (
-              <a
-                href={getFloorPlanUrl(modelName)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors"
-              >
-                Floor Plan
-              </a>
-            )}
-          </div>
+          <>
+            {/* Listed by and Floor Plan row */}
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-sm text-gray-600">
+                Listed by: <span className="font-medium">{property.listedBy}</span>
+              </span>
+              {showFloorPlanButton && (
+                <span className="text-sm text-blue-600">
+                  Floor Plan: <span className="font-medium">{modelName}</span>
+                </span>
+              )}
+            </div>
+
+            {/* Action buttons */}
+            <div className="space-y-2">
+              <button className="w-full bg-blue-600 text-white py-2 px-4 rounded font-medium hover:bg-blue-700 transition-colors">
+                More Details
+              </button>
+              <button className="w-full bg-white text-blue-600 border border-blue-600 py-2 px-4 rounded font-medium hover:bg-blue-50 transition-colors">
+                Photo Gallery
+              </button>
+            </div>
+          </>
         )}
 
-        {/* Show only floor plan button for sold properties if available - bigger and centered */}
+        {/* Sold page layout - show only floor plan button if available */}
         {isSoldPage && showFloorPlanButton && (
           <div className="flex justify-center mt-4">
             <a
