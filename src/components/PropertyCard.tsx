@@ -158,14 +158,14 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
           </div>
         )}
 
-        {/* Show only floor plan button for sold properties if available */}
+        {/* Show only floor plan button for sold properties if available - bigger and centered */}
         {isSoldPage && showFloorPlanButton && (
-          <div className="flex justify-end">
+          <div className="flex justify-center mt-4">
             <a
               href={getFloorPlanUrl(modelName)}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors"
+              className="bg-blue-600 text-white px-6 py-3 rounded-md text-base font-medium hover:bg-blue-700 transition-colors w-full text-center"
             >
               Floor Plan
             </a>
