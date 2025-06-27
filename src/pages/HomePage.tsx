@@ -45,14 +45,11 @@ export const HomePage: React.FC = () => {
     return propertyDate > latest ? propertyDate : latest;
   }, new Date(0));
 
-  const formattedUpdateTime = latestUpdate.toLocaleString('en-US', {
+  const formattedUpdateTime = latestUpdate.toLocaleDateString('en-US', {
     month: '2-digit',
     day: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
-  }).replace(',', ' at');
+    year: 'numeric'
+  });
 
   const totalPages = itemsPerPage === 0 ? 1 : Math.ceil(sortedProperties.length / itemsPerPage);
   const startIndex = itemsPerPage === 0 ? 0 : (currentPage - 1) * itemsPerPage;
