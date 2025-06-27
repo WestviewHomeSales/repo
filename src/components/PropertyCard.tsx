@@ -126,21 +126,51 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
           </div>
         </div>
 
-        <div className="flex justify-between items-center text-sm text-gray-600 mb-4">
-          <div className="flex items-center">
+        {/* Show date and price per sq ft only for current listings, not sold properties */}
+        {!isSoldPage && (
+          <div className="flex justify-between items-center text-sm text-gray-600 mb-4">
+            <div className="flex items-center">
+              <Calendar size={14} className="mr-1" />
+              <span>
+                Listed: {new Date(property.listedDate).toLocaleDateString()}
+              </span>
+            </div>
+            <span className="font-medium">${property.pricePerSqFt}/sq ft</span>
+          </div>
+        )}
+
+        {/* Show sold date only for sold properties */}
+        {isSoldPage && property.soldDate && (
+          <div className="flex items-center text-sm text-gray-600 mb-4">
             <Calendar size={14} className="mr-1" />
             <span>
-              {isSoldPage ? 'Sold' : 'Listed'}: {new Date(isSoldPage ? property.soldDate || property.listedDate : property.listedDate).toLocaleDateString()}
+              Sold: {new Date(property.soldDate).toLocaleDateString()}
             </span>
           </div>
-          <span className="font-medium">${property.pricePerSqFt}/sq ft</span>
-        </div>
+        )}
 
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">
-            Listed by: <span className="font-medium">{property.listedBy}</span>
-          </span>
-          {showFloorPlanButton && (
+        {/* Show listed by and floor plan only for current listings, not sold properties */}
+        {!isSoldPage && (
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600">
+              Listed by: <span className="font-medium">{property.listedBy}</span>
+            </span>
+            {showFloorPlanButton && (
+              <a
+                href={getFloorPlanUrl(modelName)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors"
+              >
+                Floor Plan
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* Show only floor plan button for sold properties if available */}
+        {isSoldPage && showFloorPlanButton && (
+          <div className="flex justify-end">
             <a
               href={getFloorPlanUrl(modelName)}
               target="_blank"
@@ -149,8 +179,8 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
             >
               Floor Plan
             </a>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
