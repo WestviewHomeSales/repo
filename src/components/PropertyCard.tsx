@@ -149,8 +149,15 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
                 Listed by: <span className="font-medium">{property.listedBy}</span>
               </span>
               {showFloorPlanButton && (
-                <span className="text-sm text-blue-600">
-                  Floor Plan: <span className="font-medium">{modelName}</span>
+                <span className="text-sm text-gray-600">
+                  Floor Plan: <a 
+                    href={getFloorPlanUrl(modelName)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-blue-600 hover:underline"
+                  >
+                    {modelName}
+                  </a>
                 </span>
               )}
             </div>
