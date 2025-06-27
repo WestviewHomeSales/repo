@@ -78,7 +78,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
           </div>
         )}
         {isSoldPage && property.soldDate && (
-          <div className="absolute top-4 right-4 bg-black bg-opacity-75 text-white px-2 py-1 rounded text-xs">
+          <div className="absolute top-4 right-4 bg-green-600 text-white px-2 py-1 rounded text-xs">
             Sold: {new Date(property.soldDate).toLocaleDateString()}
           </div>
         )}
