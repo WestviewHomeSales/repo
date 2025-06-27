@@ -1,24 +1,43 @@
 import React, { useEffect, useState } from 'react';
 import { Clock, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
-import { formatDateTime } from '../utils/formatters';
-import { soldProperties } from '../data/soldProperties';
 import { PropertyCard } from '../components/PropertyCard';
 import { Property } from '../types/property';
+import { fetchSoldProperties } from '../lib/supabase';
+import { mapSoldPropertyToProperty } from '../utils/propertyMapper';
 
 export const SoldPage: React.FC = () => {
-  const [sortedProperties, setSortedProperties] = useState<Property[]>(soldProperties);
+  const [soldProperties, setSoldProperties] = useState<Property[]>([]);
+  const [sortedProperties, setSortedProperties] = useState<Property[]>([]);
   const [sortOption, setSortOption] = useState('date-new');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     document.title = 'Borchini Realty | Sold Properties';
-    sortProperties(soldProperties, sortOption);
+    loadSoldProperties();
   }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [currentPage]);
+
+  const loadSoldProperties = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await fetchSoldProperties();
+      const mappedProperties = data.map(mapSoldPropertyToProperty);
+      setSoldProperties(mappedProperties);
+      sortProperties(mappedProperties, 'date-new');
+    } catch (err) {
+      console.error('Error loading sold properties:', err);
+      setError('Failed to load sold properties. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Get the most recent sold date from properties
   const latestUpdate = soldProperties.reduce((latest, property) => {
@@ -65,6 +84,37 @@ export const SoldPage: React.FC = () => {
   const endIndex = itemsPerPage === 0 ? sortedProperties.length : startIndex + itemsPerPage;
   const currentProperties = sortedProperties.slice(startIndex, endIndex);
 
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-6 md:py-10">
+        <div className="flex justify-center items-center min-h-64">
+          <div className="text-lg text-gray-600">Loading sold properties...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-6 md:py-10">
+        <div className="max-w-3xl">
+          <h1 className="text-2xl md:text-4xl font-bold mb-2">
+            Recently <span className="text-blue-600">Sold Homes</span> in Westview
+          </h1>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-6">
+            <p className="text-red-800">{error}</p>
+            <button 
+              onClick={loadSoldProperties}
+              className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-6 md:py-10">
       <div className="max-w-3xl">
@@ -77,12 +127,14 @@ export const SoldPage: React.FC = () => {
       </div>
 
       <div className="mb-6 md:mb-8">
-        <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">Sold Listings</h2>
+        <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">
+          Sold Listings ({soldProperties.length} properties)
+        </h2>
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
           <div className="flex items-center text-xs md:text-sm text-gray-600">
             <Clock size={18} className="mr-2" />
-            <span>Data Updated: {formattedUpdateTime}</span>
+            <span>Data Updated: {soldProperties.length > 0 ? formattedUpdateTime : 'No data available'}</span>
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -135,39 +187,48 @@ export const SoldPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {currentProperties.map((property) => (
-            <PropertyCard key={property.id} property={property} isSoldPage={true} />
-          ))}
-        </div>
-
-        {totalPages > 1 && (
-          <div className="flex justify-between items-center mb-12">
-            <div className="text-sm text-gray-600">
-              Showing {startIndex + 1}-{Math.min(endIndex, sortedProperties.length)} of {sortedProperties.length} listings
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Previous page"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <span className="text-sm text-gray-600">
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                onClick={() => setCurrentPage(prev => Math.min(currentPage + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Next page"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
+        {soldProperties.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600 text-lg">No sold properties found.</p>
+            <p className="text-gray-500 text-sm mt-2">Please check back later or contact us for more information.</p>
           </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {currentProperties.map((property) => (
+                <PropertyCard key={property.id} property={property} isSoldPage={true} />
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex justify-between items-center mb-12">
+                <div className="text-sm text-gray-600">
+                  Showing {startIndex + 1}-{Math.min(endIndex, sortedProperties.length)} of {sortedProperties.length} listings
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Previous page"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <span className="text-sm text-gray-600">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(currentPage + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Next page"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         <div className="bg-[#f8f9fa] rounded-lg p-6 mt-10">
