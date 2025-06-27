@@ -56,8 +56,28 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
     return '';
   };
 
+  // Generate IDX URLs based on property address
+  const generateIdxUrls = () => {
+    // Create a URL-friendly version of the address
+    const addressSlug = property.address
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
+    
+    // For now, we'll use a placeholder listing ID since we don't have the actual IDX listing IDs
+    // In a real implementation, you would need to map each property to its actual IDX listing ID
+    const listingId = `O${property.id.toString().padStart(7, '0')}`;
+    
+    const baseUrl = 'http://borchinirealty.idxbroker.com/idx';
+    const detailsUrl = `${baseUrl}/details/listing/d003/${listingId}/${addressSlug}-${property.city.toLowerCase()}-${property.state.toLowerCase()}`;
+    const galleryUrl = `${baseUrl}/photogallery/d003/${listingId}`;
+    
+    return { detailsUrl, galleryUrl };
+  };
+
   const modelName = getModelName();
   const showFloorPlanButton = modelName && hasFloorPlan(modelName);
+  const { detailsUrl, galleryUrl } = generateIdxUrls();
 
   // Format the listed date for display
   const formatListedDate = (dateString: string): string => {
@@ -164,12 +184,22 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
 
             {/* Action buttons */}
             <div className="space-y-2">
-              <button className="w-full bg-blue-600 text-white py-2 px-4 rounded font-medium hover:bg-blue-700 transition-colors">
+              <a
+                href={detailsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded font-medium hover:bg-blue-700 transition-colors block text-center"
+              >
                 More Details
-              </button>
-              <button className="w-full bg-white text-blue-600 border border-blue-600 py-2 px-4 rounded font-medium hover:bg-blue-50 transition-colors">
+              </a>
+              <a
+                href={galleryUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-white text-blue-600 border border-blue-600 py-2 px-4 rounded font-medium hover:bg-blue-50 transition-colors block text-center"
+              >
                 Photo Gallery
-              </button>
+              </a>
             </div>
           </>
         )}
