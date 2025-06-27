@@ -59,6 +59,16 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
   const modelName = getModelName();
   const showFloorPlanButton = modelName && hasFloorPlan(modelName);
 
+  // Format the listed date for display
+  const formatListedDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: 'numeric',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
       <div className="relative">
@@ -71,12 +81,13 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
             target.src = 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg';
           }}
         />
-        {/* Only show status tag on Current Listings page, not on Sold page */}
+        {/* Show date listed in green tag on Current Listings page */}
         {!isSoldPage && (
-          <div className={`absolute top-4 left-4 px-2 py-1 rounded text-white text-xs font-medium ${getStatusColor(property.status)}`}>
-            {property.status}
+          <div className="absolute top-4 left-4 bg-green-600 text-white px-2 py-1 rounded text-xs font-medium">
+            Listed: {formatListedDate(property.listedDate)}
           </div>
         )}
+        {/* Show sold date in green tag on Sold page */}
         {isSoldPage && property.soldDate && (
           <div className="absolute top-4 right-4 bg-green-600 text-white px-2 py-1 rounded text-xs">
             Sold: {new Date(property.soldDate).toLocaleDateString()}
