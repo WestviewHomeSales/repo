@@ -47,18 +47,36 @@ export const SoldPage: React.FC = () => {
 
   // Get the most recent sold date from properties
   const latestUpdate = soldProperties.reduce((latest, property) => {
-    const propertyDate = new Date(property.soldDate + 'T12:00:00'); // Add noon time to avoid timezone issues
+    // Parse the sold date - it might be in MM/DD/YYYY format from the database
+    const soldDateStr = property.soldDate || '';
+    let propertyDate: Date;
+    
+    // Try to parse different date formats
+    if (soldDateStr.includes('/')) {
+      // Handle MM/DD/YYYY format
+      const [month, day, year] = soldDateStr.split('/');
+      propertyDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    } else {
+      // Handle other formats or ISO dates
+      propertyDate = new Date(soldDateStr + 'T12:00:00');
+    }
+    
+    // Check if the date is valid
+    if (isNaN(propertyDate.getTime())) {
+      return latest;
+    }
+    
     return propertyDate > latest ? propertyDate : latest;
   }, new Date(0));
 
-  const formattedUpdateTime = latestUpdate.toLocaleString('en-US', {
+  const formattedUpdateTime = latestUpdate.getTime() > 0 ? latestUpdate.toLocaleString('en-US', {
     month: '2-digit',
     day: '2-digit',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
     hour12: false
-  }).replace(',', ' at');
+  }).replace(',', ' at') : 'No data available';
 
   const sortProperties = (props: Property[], option: string) => {
     const sorted = [...props];
@@ -71,9 +89,17 @@ export const SoldPage: React.FC = () => {
     } else if (option === 'sqft-desc') {
       sorted.sort((a, b) => b.sqFt - a.sqFt);
     } else if (option === 'date-new') {
-      sorted.sort((a, b) => new Date(b.soldDate + 'T12:00:00' || '').getTime() - new Date(a.soldDate + 'T12:00:00' || '').getTime());
+      sorted.sort((a, b) => {
+        const dateA = new Date(a.soldDate || '');
+        const dateB = new Date(b.soldDate || '');
+        return dateB.getTime() - dateA.getTime();
+      });
     } else if (option === 'date-old') {
-      sorted.sort((a, b) => new Date(a.soldDate + 'T12:00:00' || '').getTime() - new Date(b.soldDate + 'T12:00:00' || '').getTime());
+      sorted.sort((a, b) => {
+        const dateA = new Date(a.soldDate || '');
+        const dateB = new Date(b.soldDate || '');
+        return dateA.getTime() - dateB.getTime();
+      });
     }
     setSortedProperties(sorted);
     setCurrentPage(1);
@@ -140,7 +166,7 @@ export const SoldPage: React.FC = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
           <div className="flex items-center text-xs md:text-sm text-gray-600">
             <Clock size={18} className="mr-2" />
-            <span>Data Updated: {soldProperties.length > 0 ? formattedUpdateTime : 'No data available'}</span>
+            <span>Most Recent Sale: {formattedUpdateTime}</span>
           </div>
 
           <div className="flex flex-wrap gap-2">
