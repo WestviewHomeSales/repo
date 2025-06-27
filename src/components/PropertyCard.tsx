@@ -170,17 +170,10 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
           </h3>
           <div className="flex items-start text-gray-600">
             <MapPin size={14} className="mr-1 mt-0.5 flex-shrink-0" />
-            {isSoldPage ? (
-              <div className="flex flex-col text-base">
-                <span>{property.address}</span>
-                <span>{property.city}, {property.state} {property.zip}</span>
-              </div>
-            ) : (
-              <div className="flex flex-col text-sm">
-                <span>{property.address}</span>
-                <span>{property.city}, {property.state} {property.zip}</span>
-              </div>
-            )}
+            <div className="flex flex-col text-base">
+              <span>{property.address}</span>
+              <span>{property.city}, {property.state} {property.zip}</span>
+            </div>
           </div>
         </div>
 
