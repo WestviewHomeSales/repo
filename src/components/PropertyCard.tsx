@@ -139,16 +139,6 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
           </div>
         )}
 
-        {/* Show sold date only for sold properties */}
-        {isSoldPage && property.soldDate && (
-          <div className="flex items-center text-sm text-gray-600 mb-4">
-            <Calendar size={14} className="mr-1" />
-            <span>
-              Sold: {new Date(property.soldDate).toLocaleDateString()}
-            </span>
-          </div>
-        )}
-
         {/* Show listed by and floor plan only for current listings, not sold properties */}
         {!isSoldPage && (
           <div className="flex justify-between items-center">
