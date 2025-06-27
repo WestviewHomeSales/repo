@@ -69,14 +69,11 @@ export const SoldPage: React.FC = () => {
     return propertyDate > latest ? propertyDate : latest;
   }, new Date(0));
 
-  const formattedUpdateTime = latestUpdate.getTime() > 0 ? latestUpdate.toLocaleString('en-US', {
+  const formattedUpdateTime = latestUpdate.getTime() > 0 ? latestUpdate.toLocaleDateString('en-US', {
     month: '2-digit',
     day: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
-  }).replace(',', ' at') : 'No data available';
+    year: 'numeric'
+  }) : 'No data available';
 
   const sortProperties = (props: Property[], option: string) => {
     const sorted = [...props];
@@ -166,7 +163,7 @@ export const SoldPage: React.FC = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
           <div className="flex items-center text-xs md:text-sm text-gray-600">
             <Clock size={18} className="mr-2" />
-            <span>Most Recent Sale: {formattedUpdateTime}</span>
+            <span>Data Updated: {formattedUpdateTime}</span>
           </div>
 
           <div className="flex flex-wrap gap-2">
