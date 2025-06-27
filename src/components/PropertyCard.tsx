@@ -97,7 +97,10 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
                 <span>{property.city}, {property.state} {property.zip}</span>
               </div>
             ) : (
-              <span className="text-sm">{property.address}, {property.city}, {property.state} {property.zip}</span>
+              <div className="flex flex-col text-sm">
+                <span>{property.address}</span>
+                <span>{property.city}, {property.state} {property.zip}</span>
+              </div>
             )}
           </div>
         </div>
