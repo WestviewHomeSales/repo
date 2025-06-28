@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bed, Bath, Square } from 'lucide-react';
+import { Bed, Bath, Square, Share2 } from 'lucide-react';
 import { Property } from '../types/property';
 import { formatPrice } from '../utils/formatters';
 
@@ -74,6 +74,42 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
     }
   };
 
+  // Share functionality
+  const handleShare = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const shareData = {
+      title: `${formatPrice(property.price)} - ${property.address}`,
+      text: `Check out this ${property.beds} bed, ${property.baths} bath home in ${property.city}, ${property.state}. ${property.sqFt.toLocaleString()} sq ft for ${formatPrice(property.price)}.`,
+      url: window.location.href
+    };
+
+    try {
+      // Check if Web Share API is supported
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback to copying to clipboard
+        const shareText = `${shareData.title}\n${shareData.text}\n${shareData.url}`;
+        await navigator.clipboard.writeText(shareText);
+        
+        // Show a temporary notification
+        const button = e.currentTarget as HTMLButtonElement;
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+        button.classList.add('bg-green-600');
+        
+        setTimeout(() => {
+          button.innerHTML = originalContent;
+          button.classList.remove('bg-green-600');
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
+
   // Format the listed date for display - now using real dates from the database
   const formatListedDate = (dateString: string): string => {
     if (!dateString) return 'Listed';
@@ -141,6 +177,17 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
             target.src = 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg';
           }}
         />
+        
+        {/* Share Button - positioned in top right corner */}
+        <button
+          onClick={handleShare}
+          className="absolute top-4 right-4 bg-white bg-opacity-90 hover:bg-opacity-100 text-gray-700 p-2 rounded-full shadow-md transition-all duration-200 hover:shadow-lg"
+          title="Share this property"
+          aria-label="Share this property"
+        >
+          <Share2 size={16} />
+        </button>
+
         {/* Show actual listing date on Current Listings page */}
         {!isSoldPage && (
           <div className="absolute top-4 left-4 bg-green-600 text-white px-2 py-1 rounded text-xs font-medium">
@@ -149,7 +196,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
         )}
         {/* Show sold date in green tag on Sold page */}
         {isSoldPage && property.soldDate && (
-          <div className="absolute top-4 right-4 bg-green-600 text-white px-2 py-1 rounded text-xs">
+          <div className="absolute top-4 left-4 bg-green-600 text-white px-2 py-1 rounded text-xs">
             Sold: {formatSoldDate(property.soldDate)}
           </div>
         )}
