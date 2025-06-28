@@ -44,6 +44,18 @@ export default function App() {
           headerTitleStyle: {
             fontWeight: 'bold',
           },
+          tabBarStyle: {
+            backgroundColor: Colors.white,
+            borderTopWidth: 1,
+            borderTopColor: Colors.lightGray,
+            paddingBottom: 5,
+            paddingTop: 5,
+            height: 60,
+          },
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: '500',
+          },
         })}
       >
         <Tab.Screen 

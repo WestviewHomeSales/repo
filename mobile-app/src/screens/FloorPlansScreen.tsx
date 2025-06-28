@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Linking,
+  FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
@@ -34,6 +35,20 @@ const taylorMorrisonNeighborhoods: Neighborhood[] = [
       { name: 'Anastasia', sqft: '2,582', beds: '4', baths: '3.5', url: 'https://westviewhomesales.com/floorplans/Anastasia.pdf' },
       { name: 'Aruba', sqft: '1,768', beds: '3', baths: '2', url: 'https://westviewhomesales.com/floorplans/Aruba.pdf' },
       { name: 'Barbados', sqft: '3,422', beds: '4', baths: '3.5', url: 'https://westviewhomesales.com/floorplans/Barbados.pdf' },
+      { name: 'Bermuda', sqft: '3,053', beds: '4', baths: '3.5', url: 'https://westviewhomesales.com/floorplans/Bermuda.pdf' },
+      { name: 'Boca Grande', sqft: '2,197', beds: '4', baths: '2.5', url: 'https://westviewhomesales.com/floorplans/BocaGrande.pdf' },
+    ]
+  },
+  {
+    id: 'aden-south',
+    name: 'Aden South',
+    description: 'Aden South features a collection of versatile floor plans designed for modern living.',
+    plans: [
+      { name: 'Ambrosia', sqft: '1,500', beds: '3', baths: '2', url: 'https://westviewhomesales.com/floorplans/Ambrosia.pdf' },
+      { name: 'Azalea', sqft: '2,287', beds: '5', baths: '3', url: 'https://westviewhomesales.com/floorplans/Azalea.pdf' },
+      { name: 'Cypress', sqft: '1,848', beds: '4', baths: '2', url: 'https://westviewhomesales.com/floorplans/Cypress.pdf' },
+      { name: 'Elm', sqft: '2,271', beds: '4', baths: '2.5', url: 'https://westviewhomesales.com/floorplans/Elm.pdf' },
+      { name: 'Holly', sqft: '1,455', beds: '3', baths: '2', url: 'https://westviewhomesales.com/floorplans/Holly.pdf' },
     ]
   }
 ];
@@ -47,6 +62,18 @@ const lennarNeighborhoods: Neighborhood[] = [
       { name: 'Annapolis', sqft: '1,444', beds: '3', baths: '2', url: 'https://westviewhomesales.com/floorplans/Annapolis.pdf' },
       { name: 'Atlanta', sqft: '1,879', beds: '4', baths: '2.5', url: 'https://westviewhomesales.com/floorplans/Atlanta.pdf' },
       { name: 'Boston', sqft: '2,216', beds: '5', baths: '2.5', url: 'https://westviewhomesales.com/floorplans/Boston.pdf' },
+      { name: 'Columbia', sqft: '2,370', beds: '5', baths: '2.5', url: 'https://westviewhomesales.com/floorplans/Columbia.pdf' },
+      { name: 'Concord', sqft: '2,575', beds: '6', baths: '3', url: 'https://westviewhomesales.com/floorplans/Concord.pdf' },
+    ]
+  },
+  {
+    id: 'aden-south-2',
+    name: 'Aden South II',
+    description: 'Aden South II offers spacious single-family homes with flexible living spaces.',
+    plans: [
+      { name: 'Atlanta', sqft: '1,879', beds: '4', baths: '2.5', url: 'https://westviewhomesales.com/floorplans/Atlanta.pdf' },
+      { name: 'Columbia', sqft: '2,370', beds: '5', baths: '2.5', url: 'https://westviewhomesales.com/floorplans/Columbia.pdf' },
+      { name: 'Concord', sqft: '2,575', beds: '6', baths: '3', url: 'https://westviewhomesales.com/floorplans/Concord.pdf' },
     ]
   }
 ];
@@ -86,63 +113,73 @@ const FloorPlanCard: React.FC<{ plan: FloorPlan }> = ({ plan }) => {
   );
 };
 
-const NeighborhoodSection: React.FC<{ neighborhood: Neighborhood; builder: string }> = ({ neighborhood, builder }) => {
-  return (
-    <View style={styles.neighborhoodSection}>
-      <Text style={styles.neighborhoodName}>{neighborhood.name}</Text>
-      <Text style={styles.neighborhoodDescription}>{neighborhood.description}</Text>
-      
-      <View style={styles.plansGrid}>
-        {neighborhood.plans.map((plan) => (
-          <FloorPlanCard key={plan.name} plan={plan} />
-        ))}
-      </View>
-    </View>
-  );
-};
-
 export default function FloorPlansScreen() {
+  const [selectedBuilder, setSelectedBuilder] = useState<'taylor-morrison' | 'lennar'>('taylor-morrison');
+
+  const renderFloorPlan = ({ item }: { item: FloorPlan }) => (
+    <FloorPlanCard plan={item} />
+  );
+
+  const currentNeighborhoods = selectedBuilder === 'taylor-morrison' ? taylorMorrisonNeighborhoods : lennarNeighborhoods;
+
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Westview Floor Plans</Text>
         <Text style={styles.subtitle}>
           Browse our collection of floor plans from our premier home builders. Each floor plan showcases thoughtful designs and modern features.
         </Text>
+        
+        <View style={styles.builderSelector}>
+          <TouchableOpacity
+            style={[
+              styles.builderButton,
+              selectedBuilder === 'taylor-morrison' && styles.builderButtonActive
+            ]}
+            onPress={() => setSelectedBuilder('taylor-morrison')}
+          >
+            <Text style={[
+              styles.builderButtonText,
+              selectedBuilder === 'taylor-morrison' && styles.builderButtonTextActive
+            ]}>
+              Taylor Morrison
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.builderButton,
+              selectedBuilder === 'lennar' && styles.builderButtonActive
+            ]}
+            onPress={() => setSelectedBuilder('lennar')}
+          >
+            <Text style={[
+              styles.builderButtonText,
+              selectedBuilder === 'lennar' && styles.builderButtonTextActive
+            ]}>
+              Lennar
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <View style={styles.content}>
-        <View style={styles.builderSection}>
-          <Text style={styles.builderTitle}>Taylor Morrison</Text>
-          <Text style={styles.builderDescription}>
-            Taylor Morrison offers a variety of floor plans across multiple neighborhoods in Westview, including single-family homes and townhomes.
-          </Text>
-          
-          {taylorMorrisonNeighborhoods.map((neighborhood) => (
-            <NeighborhoodSection
-              key={neighborhood.id}
-              neighborhood={neighborhood}
-              builder="taylor-morrison"
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {currentNeighborhoods.map((neighborhood) => (
+          <View key={neighborhood.id} style={styles.neighborhoodSection}>
+            <Text style={styles.neighborhoodName}>{neighborhood.name}</Text>
+            <Text style={styles.neighborhoodDescription}>{neighborhood.description}</Text>
+            
+            <FlatList
+              data={neighborhood.plans}
+              renderItem={renderFloorPlan}
+              keyExtractor={(item) => item.name}
+              numColumns={2}
+              columnWrapperStyle={styles.planRow}
+              scrollEnabled={false}
             />
-          ))}
-        </View>
-
-        <View style={styles.builderSection}>
-          <Text style={styles.builderTitle}>Lennar</Text>
-          <Text style={styles.builderDescription}>
-            Lennar offers numerous floor plans across several neighborhoods in Westview, with options for every lifestyle and need.
-          </Text>
-          
-          {lennarNeighborhoods.map((neighborhood) => (
-            <NeighborhoodSection
-              key={neighborhood.id}
-              neighborhood={neighborhood}
-              builder="lennar"
-            />
-          ))}
-        </View>
-      </View>
-    </ScrollView>
+          </View>
+        ))}
+      </ScrollView>
+    </View>
   );
 }
 
@@ -167,31 +204,41 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.textSecondary,
     lineHeight: 22,
-  },
-  content: {
-    padding: 16,
-  },
-  builderSection: {
-    marginBottom: 32,
-  },
-  builderTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: Colors.text,
-    marginBottom: 8,
-  },
-  builderDescription: {
-    fontSize: 16,
-    color: Colors.textSecondary,
-    lineHeight: 22,
     marginBottom: 16,
   },
+  builderSelector: {
+    flexDirection: 'row',
+    backgroundColor: Colors.lightGray,
+    borderRadius: 8,
+    padding: 4,
+  },
+  builderButton: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderRadius: 6,
+  },
+  builderButtonActive: {
+    backgroundColor: Colors.primary,
+  },
+  builderButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  builderButtonTextActive: {
+    color: Colors.white,
+  },
+  content: {
+    flex: 1,
+    padding: 16,
+  },
   neighborhoodSection: {
-    marginBottom: 24,
+    marginBottom: 32,
   },
   neighborhoodName: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: 'bold',
     color: Colors.text,
     marginBottom: 8,
   },
@@ -201,62 +248,63 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: 16,
   },
-  plansGrid: {
-    gap: 12,
+  planRow: {
+    justifyContent: 'space-between',
   },
   planCard: {
     backgroundColor: Colors.white,
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 16,
     marginBottom: 12,
+    width: '48%',
     shadowColor: Colors.black,
     shadowOffset: {
       width: 0,
       height: 2,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
+    shadowRadius: 4,
     elevation: 5,
   },
   planName: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
     color: Colors.text,
     marginBottom: 16,
+    textAlign: 'center',
   },
   planStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
     marginBottom: 16,
   },
   planStat: {
+    flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
+    marginBottom: 8,
   },
   planStatNumber: {
     fontSize: 16,
     fontWeight: '600',
     color: Colors.text,
-    marginTop: 4,
+    marginLeft: 8,
+    flex: 1,
   },
   planStatLabel: {
-    fontSize: 10,
+    fontSize: 12,
     color: Colors.gray,
     fontWeight: '500',
-    letterSpacing: 0.5,
   },
   viewPdfButton: {
     backgroundColor: Colors.primary,
-    borderRadius: 6,
+    borderRadius: 8,
     paddingVertical: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 6,
   },
   viewPdfText: {
     color: Colors.white,
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

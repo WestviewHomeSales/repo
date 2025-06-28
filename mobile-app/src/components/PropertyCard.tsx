@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Linking,
   Alert,
+  Share,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Property } from '../types/Property';
@@ -35,11 +36,29 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
     }
   };
 
-  const handleShare = () => {
-    const shareText = `Check out this ${property.beds} bed, ${property.baths} bath home in ${property.city}, ${property.state}. ${formatNumber(property.sqFt)} sq ft for ${formatPrice(property.price)}.`;
+  const handleShare = async () => {
+    const shareContent = {
+      message: `Check out this ${property.beds} bed, ${property.baths} bath home in ${property.city}, ${property.state}. ${formatNumber(property.sqFt)} sq ft for ${formatPrice(property.price)}.`,
+      url: property.moreDetailsUrl || '',
+      title: `${formatPrice(property.price)} - ${property.address}`,
+    };
     
-    // You can implement native sharing here
-    Alert.alert('Share Property', shareText);
+    try {
+      await Share.share(shareContent);
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
+
+  const handleCall = () => {
+    Linking.openURL('tel:4075227375');
+  };
+
+  const handleEmail = () => {
+    const subject = `Inquiry about ${property.address}`;
+    const body = `I'm interested in learning more about the property at ${property.address}, ${property.city}, ${property.state} ${property.zip}.\n\nPrice: ${formatPrice(property.price)}\nBeds: ${property.beds}\nBaths: ${property.baths}\nSquare Feet: ${formatNumber(property.sqFt)}\n\nPlease contact me with more information.`;
+    
+    Linking.openURL(`mailto:WestviewHomeSales@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
   };
 
   return (
@@ -111,6 +130,16 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
             <TouchableOpacity style={styles.secondaryButton} onPress={handlePhotoGallery}>
               <Text style={styles.secondaryButtonText}>Photo Gallery</Text>
             </TouchableOpacity>
+            <View style={styles.contactButtons}>
+              <TouchableOpacity style={styles.contactButton} onPress={handleCall}>
+                <Ionicons name="call" size={16} color={Colors.white} />
+                <Text style={styles.contactButtonText}>Call</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.contactButton} onPress={handleEmail}>
+                <Ionicons name="mail" size={16} color={Colors.white} />
+                <Text style={styles.contactButtonText}>Email</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
       </View>
@@ -121,25 +150,25 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
 const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.white,
-    borderRadius: 8,
+    borderRadius: 12,
     marginBottom: 16,
     shadowColor: Colors.black,
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowRadius: 6,
+    elevation: 8,
   },
   imageContainer: {
     position: 'relative',
   },
   image: {
     width: '100%',
-    height: 200,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
+    height: 220,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
   },
   shareButton: {
     position: 'absolute',
@@ -154,28 +183,28 @@ const styles = StyleSheet.create({
     top: 12,
     left: 12,
     backgroundColor: Colors.success,
-    borderRadius: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
   },
   listedText: {
     color: Colors.white,
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   soldBadge: {
     position: 'absolute',
     top: 12,
     left: 12,
     backgroundColor: Colors.success,
-    borderRadius: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
   },
   soldText: {
     color: Colors.white,
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   content: {
     padding: 16,
@@ -184,10 +213,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   price: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: Colors.text,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   addressContainer: {
     flexDirection: 'column',
@@ -195,6 +224,7 @@ const styles = StyleSheet.create({
   address: {
     fontSize: 16,
     color: Colors.textSecondary,
+    fontWeight: '500',
   },
   cityState: {
     fontSize: 16,
@@ -204,22 +234,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginBottom: 16,
+    paddingVertical: 12,
+    backgroundColor: Colors.lightGray,
+    borderRadius: 8,
   },
   stat: {
     alignItems: 'center',
     flex: 1,
   },
   statNumber: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: '700',
     color: Colors.text,
-    marginTop: 4,
+    marginTop: 6,
   },
   statLabel: {
     fontSize: 10,
     color: Colors.gray,
-    fontWeight: '500',
+    fontWeight: '600',
     letterSpacing: 0.5,
+    marginTop: 2,
   },
   listedByContainer: {
     marginBottom: 16,
@@ -229,34 +263,53 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   listedByName: {
-    fontWeight: '500',
+    fontWeight: '600',
     color: Colors.text,
   },
   buttonContainer: {
-    gap: 8,
+    gap: 10,
   },
   primaryButton: {
     backgroundColor: Colors.primary,
-    borderRadius: 6,
-    paddingVertical: 12,
+    borderRadius: 8,
+    paddingVertical: 14,
     alignItems: 'center',
   },
   primaryButtonText: {
     color: Colors.white,
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   secondaryButton: {
     backgroundColor: Colors.white,
     borderColor: Colors.primary,
-    borderWidth: 1,
-    borderRadius: 6,
-    paddingVertical: 12,
+    borderWidth: 2,
+    borderRadius: 8,
+    paddingVertical: 14,
     alignItems: 'center',
   },
   secondaryButtonText: {
     color: Colors.primary,
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
+  },
+  contactButtons: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  contactButton: {
+    flex: 1,
+    backgroundColor: Colors.success,
+    borderRadius: 8,
+    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  contactButtonText: {
+    color: Colors.white,
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

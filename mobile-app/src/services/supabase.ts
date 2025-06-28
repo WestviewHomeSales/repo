@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-// You'll need to add these to your environment variables
+// Replace these with your actual Supabase credentials
 const supabaseUrl = 'YOUR_SUPABASE_URL';
 const supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
 
@@ -25,6 +25,8 @@ export interface ActivePropertyData {
 
 export async function fetchSoldProperties(): Promise<SoldPropertyData[]> {
   try {
+    console.log('Fetching sold properties from Supabase...');
+    
     const [{ data: data2024, error: error2024 }, { data: data2025, error: error2025 }] = await Promise.all([
       supabase.from('whs2024').select('*'),
       supabase.from('whs2025').select('*')
@@ -44,6 +46,8 @@ export async function fetchSoldProperties(): Promise<SoldPropertyData[]> {
 
 export async function fetchActiveProperties(): Promise<ActivePropertyData[]> {
   try {
+    console.log('Fetching active properties from Supabase...');
+    
     const { data, error } = await supabase
       .from('westviewactive')
       .select('*');
@@ -53,6 +57,7 @@ export async function fetchActiveProperties(): Promise<ActivePropertyData[]> {
       return [];
     }
 
+    console.log(`Successfully fetched ${data?.length || 0} active properties`);
     return data || [];
   } catch (error) {
     console.error('Error fetching active properties:', error);

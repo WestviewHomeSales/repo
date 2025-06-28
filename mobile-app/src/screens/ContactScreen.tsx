@@ -96,6 +96,24 @@ ${formData.message}`;
       </View>
 
       <View style={styles.content}>
+        {/* Quick Contact Buttons */}
+        <View style={styles.quickContactSection}>
+          <TouchableOpacity 
+            style={[styles.quickContactButton, { backgroundColor: Colors.success }]}
+            onPress={() => handleCall('4075227375')}
+          >
+            <Ionicons name="call" size={24} color={Colors.white} />
+            <Text style={styles.quickContactText}>Call Now</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.quickContactButton, { backgroundColor: Colors.primary }]}
+            onPress={() => handleEmail('WestviewHomeSales@gmail.com')}
+          >
+            <Ionicons name="mail" size={24} color={Colors.white} />
+            <Text style={styles.quickContactText}>Email Us</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Contact Form */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Send Us a Message</Text>
@@ -107,6 +125,7 @@ ${formData.message}`;
               value={formData.name}
               onChangeText={(text) => setFormData(prev => ({ ...prev, name: text }))}
               placeholder="Your name"
+              placeholderTextColor={Colors.gray}
             />
           </View>
 
@@ -117,6 +136,7 @@ ${formData.message}`;
               value={formData.email}
               onChangeText={(text) => setFormData(prev => ({ ...prev, email: text }))}
               placeholder="your.email@example.com"
+              placeholderTextColor={Colors.gray}
               keyboardType="email-address"
               autoCapitalize="none"
             />
@@ -129,6 +149,7 @@ ${formData.message}`;
               value={formData.phone}
               onChangeText={(text) => setFormData(prev => ({ ...prev, phone: text }))}
               placeholder="(123) 456-7890"
+              placeholderTextColor={Colors.gray}
               keyboardType="phone-pad"
             />
           </View>
@@ -140,6 +161,7 @@ ${formData.message}`;
               value={formData.message}
               onChangeText={(text) => setFormData(prev => ({ ...prev, message: text }))}
               placeholder="Write your message here..."
+              placeholderTextColor={Colors.gray}
               multiline
               numberOfLines={5}
               textAlignVertical="top"
@@ -155,39 +177,42 @@ ${formData.message}`;
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Our Office</Text>
           
-          <View style={styles.contactItem}>
+          <TouchableOpacity 
+            style={styles.contactItem}
+            onPress={() => openMap('345 Sorrento Rd, Kissimmee, FL 34759')}
+          >
             <Ionicons name="location-outline" size={20} color={Colors.primary} />
             <View style={styles.contactInfo}>
               <Text style={styles.contactLabel}>Address</Text>
-              <TouchableOpacity onPress={() => openMap('345 Sorrento Rd, Kissimmee, FL 34759')}>
-                <Text style={styles.contactValue}>
-                  Borchini Realty{'\n'}
-                  345 Sorrento Rd.{'\n'}
-                  Kissimmee, FL 34759
-                </Text>
-              </TouchableOpacity>
+              <Text style={styles.contactValue}>
+                Borchini Realty{'\n'}
+                345 Sorrento Rd.{'\n'}
+                Kissimmee, FL 34759
+              </Text>
             </View>
-          </View>
+          </TouchableOpacity>
 
-          <View style={styles.contactItem}>
+          <TouchableOpacity 
+            style={styles.contactItem}
+            onPress={() => handleCall('(407) 522-7375')}
+          >
             <Ionicons name="call-outline" size={20} color={Colors.primary} />
             <View style={styles.contactInfo}>
               <Text style={styles.contactLabel}>Phone</Text>
-              <TouchableOpacity onPress={() => handleCall('(407) 522-7375')}>
-                <Text style={[styles.contactValue, styles.linkText]}>(407) 522-7375</Text>
-              </TouchableOpacity>
+              <Text style={[styles.contactValue, styles.linkText]}>(407) 522-7375</Text>
             </View>
-          </View>
+          </TouchableOpacity>
 
-          <View style={styles.contactItem}>
+          <TouchableOpacity 
+            style={styles.contactItem}
+            onPress={() => handleEmail('WestviewHomeSales@gmail.com')}
+          >
             <Ionicons name="mail-outline" size={20} color={Colors.primary} />
             <View style={styles.contactInfo}>
               <Text style={styles.contactLabel}>Email</Text>
-              <TouchableOpacity onPress={() => handleEmail('WestviewHomeSales@gmail.com')}>
-                <Text style={[styles.contactValue, styles.linkText]}>WestviewHomeSales@gmail.com</Text>
-              </TouchableOpacity>
+              <Text style={[styles.contactValue, styles.linkText]}>WestviewHomeSales@gmail.com</Text>
             </View>
-          </View>
+          </TouchableOpacity>
 
           <View style={styles.contactItem}>
             <Ionicons name="time-outline" size={20} color={Colors.primary} />
@@ -259,9 +284,28 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
   },
+  quickContactSection: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  quickContactButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 12,
+    gap: 8,
+  },
+  quickContactText: {
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: '600',
+  },
   section: {
     backgroundColor: Colors.white,
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 16,
     marginBottom: 16,
     shadowColor: Colors.black,
@@ -270,12 +314,12 @@ const styles = StyleSheet.create({
       height: 2,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
+    shadowRadius: 4,
     elevation: 5,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
     color: Colors.text,
     marginBottom: 16,
   },
@@ -284,17 +328,18 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
     color: Colors.text,
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
     borderColor: Colors.lightGray,
-    borderRadius: 6,
+    borderRadius: 8,
     padding: 12,
     fontSize: 16,
     color: Colors.text,
+    backgroundColor: Colors.white,
   },
   textArea: {
     height: 100,
@@ -302,15 +347,15 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     backgroundColor: Colors.primary,
-    borderRadius: 6,
-    paddingVertical: 12,
+    borderRadius: 8,
+    paddingVertical: 14,
     alignItems: 'center',
     marginTop: 8,
   },
   submitButtonText: {
     color: Colors.white,
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   contactItem: {
     flexDirection: 'row',
@@ -323,7 +368,7 @@ const styles = StyleSheet.create({
   },
   contactLabel: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
     color: Colors.text,
     marginBottom: 4,
   },
