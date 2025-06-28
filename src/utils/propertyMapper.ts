@@ -56,43 +56,60 @@ export function mapSoldPropertyToProperty(soldProperty: SoldPropertyData): Prope
 }
 
 export function mapActivePropertyToProperty(activeProperty: ActivePropertyData): Property {
-  console.log('=== MAPPING ACTIVE PROPERTY ===')
-  console.log('Raw property data:', activeProperty)
-  console.log('Available keys:', Object.keys(activeProperty))
+  console.log('🔄 === MAPPING ACTIVE PROPERTY ===')
+  console.log('📥 Raw property data:', activeProperty)
+  console.log('🔑 Available keys:', Object.keys(activeProperty))
   
   // Use the ID from the database
-  const id = activeProperty.ID
+  const id = activeProperty.ID || activeProperty.id || Math.random() * 1000000
+
+  // Function to find the best matching column for a value
+  const findColumn = (searchTerms: string[]): string | null => {
+    const allKeys = Object.keys(activeProperty)
+    
+    for (const term of searchTerms) {
+      // Try exact match first
+      const exactMatch = allKeys.find(key => key.toLowerCase() === term.toLowerCase())
+      if (exactMatch) return exactMatch
+      
+      // Try partial match
+      const partialMatch = allKeys.find(key => key.toLowerCase().includes(term.toLowerCase()))
+      if (partialMatch) return partialMatch
+    }
+    
+    return null
+  }
 
   // Enhanced price parsing function
-  const parsePrice = (priceStr: string | number | undefined): number => {
-    console.log('Parsing price input:', priceStr, 'Type:', typeof priceStr)
+  const parsePrice = (priceStr: any): number => {
+    console.log('💰 Parsing price input:', priceStr, 'Type:', typeof priceStr)
     
     if (!priceStr && priceStr !== 0) {
-      console.log('No price provided')
+      console.log('❌ No price provided')
       return 0
     }
     
     // If it's already a number, return it
     if (typeof priceStr === 'number') {
-      console.log('Price is already a number:', priceStr)
+      console.log('✅ Price is already a number:', priceStr)
       return Math.round(priceStr)
     }
     
     // Convert to string and clean it
     const str = String(priceStr).trim()
-    console.log('Price as string:', str)
+    console.log('🔤 Price as string:', str)
     
     if (str === '' || str === 'null' || str === 'undefined') {
-      console.log('Empty or null price string')
+      console.log('❌ Empty or null price string')
       return 0
     }
     
     // Remove all non-numeric characters except decimal points
     const cleaned = str.replace(/[^0-9.]/g, '')
-    console.log('Cleaned price string:', cleaned)
+    console.log('🧹 Cleaned price string:', cleaned)
     
     if (cleaned === '') {
-      console.log('No numeric characters found')
+      console.log('❌ No numeric characters found')
       return 0
     }
     
@@ -100,49 +117,70 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
     const parsed = parseFloat(cleaned)
     const result = isNaN(parsed) ? 0 : Math.round(parsed)
     
-    console.log(`Final price parsing: "${priceStr}" -> "${cleaned}" -> ${parsed} -> ${result}`)
+    console.log(`✅ Final price parsing: "${priceStr}" -> "${cleaned}" -> ${parsed} -> ${result}`)
     return result
   }
 
   // Enhanced square feet parsing function
-  const parseSqFt = (sqFtStr: string | number | undefined): number => {
-    console.log('Parsing sqft input:', sqFtStr, 'Type:', typeof sqFtStr)
+  const parseSqFt = (sqFtStr: any): number => {
+    console.log('📐 Parsing sqft input:', sqFtStr, 'Type:', typeof sqFtStr)
     
     if (!sqFtStr && sqFtStr !== 0) {
-      console.log('No sqft provided')
+      console.log('❌ No sqft provided')
       return 0
     }
     
     // If it's already a number, return it
     if (typeof sqFtStr === 'number') {
-      console.log('SqFt is already a number:', sqFtStr)
+      console.log('✅ SqFt is already a number:', sqFtStr)
       return Math.round(sqFtStr)
     }
     
     // Convert to string and clean it
     const str = String(sqFtStr).trim()
-    console.log('SqFt as string:', str)
+    console.log('🔤 SqFt as string:', str)
     
     if (str === '' || str === 'null' || str === 'undefined') {
-      console.log('Empty or null sqft string')
+      console.log('❌ Empty or null sqft string')
       return 0
     }
     
     // Remove all non-numeric characters
     const cleaned = str.replace(/[^0-9]/g, '')
-    console.log('Cleaned sqft string:', cleaned)
+    console.log('🧹 Cleaned sqft string:', cleaned)
     
     if (cleaned === '') {
-      console.log('No numeric characters found in sqft')
+      console.log('❌ No numeric characters found in sqft')
       return 0
     }
     
     const parsed = parseInt(cleaned)
     const result = isNaN(parsed) ? 0 : parsed
     
-    console.log(`Final sqft parsing: "${sqFtStr}" -> "${cleaned}" -> ${parsed} -> ${result}`)
+    console.log(`✅ Final sqft parsing: "${sqFtStr}" -> "${cleaned}" -> ${parsed} -> ${result}`)
     return result
   }
+
+  // Try to find price column
+  const priceColumnNames = ['List Price', 'list price', 'price', 'Price', 'ListPrice', 'list_price', 'Sold Price', 'sold price', 'SoldPrice', 'sold_price']
+  const priceColumn = findColumn(priceColumnNames)
+  console.log('💰 Found price column:', priceColumn)
+  
+  // Try to find square feet column
+  const sqftColumnNames = ['Square Feet', 'square feet', 'sqft', 'SqFt', 'sq_ft', 'square_feet', 'SquareFeet', 'area', 'Area']
+  const sqftColumn = findColumn(sqftColumnNames)
+  console.log('📐 Found sqft column:', sqftColumn)
+  
+  // Get the actual values
+  const priceValue = priceColumn ? activeProperty[priceColumn] : null
+  const sqftValue = sqftColumn ? activeProperty[sqftColumn] : null
+  
+  console.log('💰 Price value from column:', priceValue)
+  console.log('📐 SqFt value from column:', sqftValue)
+  
+  const price = parsePrice(priceValue)
+  const sqFt = parseSqFt(sqftValue)
+  const pricePerSqFt = sqFt > 0 && price > 0 ? Math.round(price / sqFt) : 0
 
   // Map model name to image URL
   const getImageUrl = (model: string): string => {
@@ -169,20 +207,6 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
     
     return 'Westview Builder'
   }
-
-  // Try to get price from either "List Price" or "Sold Price" columns
-  const listPrice = activeProperty["List Price"]
-  const soldPrice = activeProperty["Sold Price"]
-  const priceToUse = listPrice || soldPrice
-  
-  console.log('Price fields available:')
-  console.log('- List Price:', listPrice)
-  console.log('- Sold Price:', soldPrice)
-  console.log('- Using:', priceToUse)
-  
-  const price = parsePrice(priceToUse)
-  const sqFt = parseSqFt(activeProperty["Square Feet"])
-  const pricePerSqFt = sqFt > 0 && price > 0 ? Math.round(price / sqFt) : 0
 
   // Parse the address to avoid duplication
   const parseAddress = (addressStr: string): { address: string, city: string, state: string, zip: string } => {
@@ -213,7 +237,7 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
   }
 
   const addressInfo = parseAddress(activeProperty.Address || '')
-  console.log('Parsed address:', addressInfo)
+  console.log('🏠 Parsed address:', addressInfo)
 
   // Use current date for listing date since there's no "Date Listed" column
   const listedDate = new Date().toISOString().split('T')[0]
@@ -224,7 +248,7 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
     .replace(/[^a-z0-9-]/g, '')
 
   const baseUrl = 'http://borchinirealty.idxbroker.com/idx'
-  const listingId = `O${activeProperty.ID.toString().padStart(7, '0')}`
+  const listingId = `O${id.toString().padStart(7, '0')}`
   const detailsUrl = `${baseUrl}/details/listing/d003/${listingId}/${addressSlug}-kissimmee-fl`
   const galleryUrl = `${baseUrl}/photogallery/d003/${listingId}`
 
@@ -251,10 +275,10 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
     photoGalleryUrl: galleryUrl
   }
 
-  console.log('=== MAPPED PROPERTY RESULT ===')
-  console.log('Final mapped property:', mappedProperty)
-  console.log('Price check - Original:', priceToUse, 'Parsed:', price)
-  console.log('SqFt check - Original:', activeProperty["Square Feet"], 'Parsed:', sqFt)
+  console.log('✅ === MAPPED PROPERTY RESULT ===')
+  console.log('🏠 Final mapped property:', mappedProperty)
+  console.log('💰 Price check - Column:', priceColumn, 'Original:', priceValue, 'Parsed:', price)
+  console.log('📐 SqFt check - Column:', sqftColumn, 'Original:', sqftValue, 'Parsed:', sqFt)
   console.log('================================')
   
   return mappedProperty
