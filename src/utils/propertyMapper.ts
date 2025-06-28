@@ -63,46 +63,85 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
   // Use the ID from the database
   const id = activeProperty.ID
 
-  // Parse price from string (remove $ and commas) - try both "List Price" and "Sold Price"
-  const parsePrice = (priceStr: string | undefined): number => {
-    if (!priceStr) {
-      console.log('No price string provided:', priceStr)
+  // Enhanced price parsing function
+  const parsePrice = (priceStr: string | number | undefined): number => {
+    console.log('Parsing price input:', priceStr, 'Type:', typeof priceStr)
+    
+    if (!priceStr && priceStr !== 0) {
+      console.log('No price provided')
       return 0
     }
     
-    // Handle different price formats
-    let cleaned = String(priceStr).replace(/[$,\s]/g, '')
-    
     // If it's already a number, return it
-    if (!isNaN(Number(cleaned))) {
-      const parsed = parseInt(cleaned) || 0
-      console.log(`Parsing price: "${priceStr}" -> "${cleaned}" -> ${parsed}`)
-      return parsed
+    if (typeof priceStr === 'number') {
+      console.log('Price is already a number:', priceStr)
+      return Math.round(priceStr)
     }
     
-    console.log(`Could not parse price: "${priceStr}"`)
-    return 0
+    // Convert to string and clean it
+    const str = String(priceStr).trim()
+    console.log('Price as string:', str)
+    
+    if (str === '' || str === 'null' || str === 'undefined') {
+      console.log('Empty or null price string')
+      return 0
+    }
+    
+    // Remove all non-numeric characters except decimal points
+    const cleaned = str.replace(/[^0-9.]/g, '')
+    console.log('Cleaned price string:', cleaned)
+    
+    if (cleaned === '') {
+      console.log('No numeric characters found')
+      return 0
+    }
+    
+    // Parse as float first, then round to integer
+    const parsed = parseFloat(cleaned)
+    const result = isNaN(parsed) ? 0 : Math.round(parsed)
+    
+    console.log(`Final price parsing: "${priceStr}" -> "${cleaned}" -> ${parsed} -> ${result}`)
+    return result
   }
 
-  // Parse square feet from string
-  const parseSqFt = (sqFtStr: string | undefined): number => {
-    if (!sqFtStr) {
-      console.log('No sqft string provided:', sqFtStr)
+  // Enhanced square feet parsing function
+  const parseSqFt = (sqFtStr: string | number | undefined): number => {
+    console.log('Parsing sqft input:', sqFtStr, 'Type:', typeof sqFtStr)
+    
+    if (!sqFtStr && sqFtStr !== 0) {
+      console.log('No sqft provided')
       return 0
     }
     
-    // Handle different sqft formats
-    let cleaned = String(sqFtStr).replace(/[,\s]/g, '')
-    
     // If it's already a number, return it
-    if (!isNaN(Number(cleaned))) {
-      const parsed = parseInt(cleaned) || 0
-      console.log(`Parsing sqft: "${sqFtStr}" -> "${cleaned}" -> ${parsed}`)
-      return parsed
+    if (typeof sqFtStr === 'number') {
+      console.log('SqFt is already a number:', sqFtStr)
+      return Math.round(sqFtStr)
     }
     
-    console.log(`Could not parse sqft: "${sqFtStr}"`)
-    return 0
+    // Convert to string and clean it
+    const str = String(sqFtStr).trim()
+    console.log('SqFt as string:', str)
+    
+    if (str === '' || str === 'null' || str === 'undefined') {
+      console.log('Empty or null sqft string')
+      return 0
+    }
+    
+    // Remove all non-numeric characters
+    const cleaned = str.replace(/[^0-9]/g, '')
+    console.log('Cleaned sqft string:', cleaned)
+    
+    if (cleaned === '') {
+      console.log('No numeric characters found in sqft')
+      return 0
+    }
+    
+    const parsed = parseInt(cleaned)
+    const result = isNaN(parsed) ? 0 : parsed
+    
+    console.log(`Final sqft parsing: "${sqFtStr}" -> "${cleaned}" -> ${parsed} -> ${result}`)
+    return result
   }
 
   // Map model name to image URL
@@ -136,11 +175,14 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
   const soldPrice = activeProperty["Sold Price"]
   const priceToUse = listPrice || soldPrice
   
-  console.log('Price fields:', { listPrice, soldPrice, priceToUse })
+  console.log('Price fields available:')
+  console.log('- List Price:', listPrice)
+  console.log('- Sold Price:', soldPrice)
+  console.log('- Using:', priceToUse)
   
   const price = parsePrice(priceToUse)
   const sqFt = parseSqFt(activeProperty["Square Feet"])
-  const pricePerSqFt = sqFt > 0 ? Math.round(price / sqFt) : 0
+  const pricePerSqFt = sqFt > 0 && price > 0 ? Math.round(price / sqFt) : 0
 
   // Parse the address to avoid duplication
   const parseAddress = (addressStr: string): { address: string, city: string, state: string, zip: string } => {
@@ -211,6 +253,8 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
 
   console.log('=== MAPPED PROPERTY RESULT ===')
   console.log('Final mapped property:', mappedProperty)
+  console.log('Price check - Original:', priceToUse, 'Parsed:', price)
+  console.log('SqFt check - Original:', activeProperty["Square Feet"], 'Parsed:', sqFt)
   console.log('================================')
   
   return mappedProperty
