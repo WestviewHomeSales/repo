@@ -560,22 +560,6 @@ export const UsefulInfoPage: React.FC = () => {
                 </p>
                 <p className="text-sm text-gray-600">Playground, sports fields, walking trails</p>
               </li>
-              <li>
-                <h3 className="font-medium">Solivita</h3>
-                <p className="text-sm text-gray-600 cursor-pointer hover:underline" onClick={() => openMap('395 Village Dr, Kissimmee, FL 34759')}>
-                  395 Village Dr.<br />
-                  Kissimmee, FL 34759
-                </p>
-                <p className="text-sm text-gray-600">Golf courses, fitness center, pools</p>
-                <a
-                  href="https://www.stonegategolf.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 text-sm hover:underline flex items-center mt-1"
-                >
-                  Visit Website
-                </a>
-              </li>
             </ul>
           </div>
         </div>
