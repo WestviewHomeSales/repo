@@ -66,17 +66,28 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
   // Function to find the best matching column for a value
   const findColumn = (searchTerms: string[]): string | null => {
     const allKeys = Object.keys(activeProperty)
+    console.log(`🔍 Searching for column matching: ${searchTerms.join(', ')}`)
+    console.log(`📋 Available columns: ${allKeys.join(', ')}`)
     
     for (const term of searchTerms) {
-      // Try exact match first
+      // Try exact match first (case insensitive)
       const exactMatch = allKeys.find(key => key.toLowerCase() === term.toLowerCase())
-      if (exactMatch) return exactMatch
-      
-      // Try partial match
-      const partialMatch = allKeys.find(key => key.toLowerCase().includes(term.toLowerCase()))
-      if (partialMatch) return partialMatch
+      if (exactMatch) {
+        console.log(`✅ Found exact match: "${exactMatch}" for term "${term}"`)
+        return exactMatch
+      }
     }
     
+    // Try partial matches
+    for (const term of searchTerms) {
+      const partialMatch = allKeys.find(key => key.toLowerCase().includes(term.toLowerCase()))
+      if (partialMatch) {
+        console.log(`✅ Found partial match: "${partialMatch}" for term "${term}"`)
+        return partialMatch
+      }
+    }
+    
+    console.log(`❌ No match found for any of: ${searchTerms.join(', ')}`)
     return null
   }
 
@@ -123,10 +134,13 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
 
   // Enhanced square feet parsing function
   const parseSqFt = (sqFtStr: any): number => {
-    console.log('📐 Parsing sqft input:', sqFtStr, 'Type:', typeof sqFtStr)
+    console.log('📐 === PARSING SQUARE FEET ===')
+    console.log('📐 Input value:', sqFtStr)
+    console.log('📐 Input type:', typeof sqFtStr)
+    console.log('📐 Input as JSON:', JSON.stringify(sqFtStr))
     
     if (!sqFtStr && sqFtStr !== 0) {
-      console.log('❌ No sqft provided')
+      console.log('❌ No sqft provided (null/undefined)')
       return 0
     }
     
@@ -138,38 +152,76 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
     
     // Convert to string and clean it
     const str = String(sqFtStr).trim()
-    console.log('🔤 SqFt as string:', str)
+    console.log('🔤 SqFt as string:', `"${str}"`)
     
     if (str === '' || str === 'null' || str === 'undefined') {
       console.log('❌ Empty or null sqft string')
       return 0
     }
     
-    // Remove all non-numeric characters
+    // Remove all non-numeric characters (including commas, spaces, etc.)
     const cleaned = str.replace(/[^0-9]/g, '')
-    console.log('🧹 Cleaned sqft string:', cleaned)
+    console.log('🧹 Cleaned sqft string:', `"${cleaned}"`)
     
     if (cleaned === '') {
       console.log('❌ No numeric characters found in sqft')
       return 0
     }
     
-    const parsed = parseInt(cleaned)
+    const parsed = parseInt(cleaned, 10)
     const result = isNaN(parsed) ? 0 : parsed
     
     console.log(`✅ Final sqft parsing: "${sqFtStr}" -> "${cleaned}" -> ${parsed} -> ${result}`)
+    console.log('📐 === END PARSING SQUARE FEET ===')
     return result
   }
 
-  // Try to find price column
-  const priceColumnNames = ['List Price', 'list price', 'price', 'Price', 'ListPrice', 'list_price', 'Sold Price', 'sold price', 'SoldPrice', 'sold_price']
+  // Try to find price column with more variations
+  const priceColumnNames = [
+    'List Price', 'list price', 'price', 'Price', 'ListPrice', 'list_price', 
+    'Sold Price', 'sold price', 'SoldPrice', 'sold_price',
+    'Current Price', 'current price', 'CurrentPrice', 'current_price',
+    'asking price', 'Asking Price', 'AskingPrice', 'asking_price'
+  ]
   const priceColumn = findColumn(priceColumnNames)
   console.log('💰 Found price column:', priceColumn)
   
-  // Try to find square feet column
-  const sqftColumnNames = ['Square Feet', 'square feet', 'sqft', 'SqFt', 'sq_ft', 'square_feet', 'SquareFeet', 'area', 'Area']
+  // Try to find square feet column with MANY more variations
+  const sqftColumnNames = [
+    // Standard variations
+    'Square Feet', 'square feet', 'sqft', 'SqFt', 'sq_ft', 'square_feet', 'SquareFeet',
+    // With spaces and punctuation
+    'Sq Ft', 'sq ft', 'Sq. Ft.', 'sq. ft.', 'Square Ft', 'square ft',
+    // Abbreviated
+    'sf', 'SF', 'sq', 'SQ',
+    // Area variations
+    'area', 'Area', 'AREA', 'living area', 'Living Area', 'LivingArea', 'living_area',
+    // Size variations
+    'size', 'Size', 'SIZE', 'home size', 'Home Size', 'HomeSize', 'home_size',
+    // Floor area
+    'floor area', 'Floor Area', 'FloorArea', 'floor_area',
+    // Interior area
+    'interior area', 'Interior Area', 'InteriorArea', 'interior_area',
+    // Total area
+    'total area', 'Total Area', 'TotalArea', 'total_area',
+    // Footage
+    'footage', 'Footage', 'FOOTAGE', 'square footage', 'Square Footage', 'SquareFootage', 'square_footage'
+  ]
   const sqftColumn = findColumn(sqftColumnNames)
   console.log('📐 Found sqft column:', sqftColumn)
+  
+  // If we still can't find sqft column, let's check all columns that might contain numeric data
+  if (!sqftColumn) {
+    console.log('🔍 SQFT COLUMN NOT FOUND - CHECKING ALL NUMERIC COLUMNS:')
+    const allKeys = Object.keys(activeProperty)
+    allKeys.forEach(key => {
+      const value = activeProperty[key]
+      const isNumeric = !isNaN(Number(value)) && value !== null && value !== ''
+      if (isNumeric && Number(value) > 500 && Number(value) < 10000) {
+        console.log(`🏠 Potential sqft column "${key}": ${value} (looks like square footage)`)
+      }
+    })
+  }
   
   // Get the actual values
   const priceValue = priceColumn ? activeProperty[priceColumn] : null
@@ -181,6 +233,10 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
   const price = parsePrice(priceValue)
   const sqFt = parseSqFt(sqftValue)
   const pricePerSqFt = sqFt > 0 && price > 0 ? Math.round(price / sqFt) : 0
+
+  console.log('💰 Final parsed price:', price)
+  console.log('📐 Final parsed sqft:', sqFt)
+  console.log('💲 Price per sqft:', pricePerSqFt)
 
   // Map model name to image URL
   const getImageUrl = (model: string): string => {
