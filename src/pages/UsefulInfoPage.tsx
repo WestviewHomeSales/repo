@@ -245,7 +245,6 @@ export const UsefulInfoPage: React.FC = () => {
           </div>
           <div className="p-4">
             <ul className="space-y-3">
-              {/* Reordered Utilities Links */}
               <li>
                 <h3 className="font-medium">Duke Energy</h3>
                 <p className="text-sm text-gray-600">
@@ -269,36 +268,6 @@ export const UsefulInfoPage: React.FC = () => {
                 <p className="text-sm text-gray-600">Water & Wastewater Services</p>
                 <a
                   href="https://www.tohowater.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 text-sm hover:underline flex items-center mt-1"
-                >
-                  Visit Website
-                </a>
-              </li>
-              <li>
-                <h3 className="font-medium">Waste Management</h3>
-                <p className="text-sm text-gray-600">
-                  <a href={`tel:${'407-843-1700'}`} className="hover:underline"><strong>{formatPhoneNumber('407-843-1700')}</strong></a>
-                </p>
-                <p className="text-sm text-gray-600">Garbage & Recycling Services</p>
-                <a
-                  href="https://www.wm.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 text-sm hover:underline flex items-center mt-1"
-                >
-                  Visit Website
-                </a>
-              </li>
-              <li>
-                <h3 className="font-medium">Polk County Solid Waste Division</h3>
-                <p className="text-sm text-gray-600">
-                  <a href={`tel:${'863-284-4319'}`} className="hover:underline"><strong>{formatPhoneNumber('863-284-4319')}</strong></a>
-                </p>
-                <p className="text-sm text-gray-600">Garbage & Recycling Services</p>
-                <a
-                  href="https://www.polk-county.net/services/polk-county-solid-waste/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 text-sm hover:underline flex items-center mt-1"
@@ -424,7 +393,7 @@ export const UsefulInfoPage: React.FC = () => {
                 </p>
               </li>
               <li>
-                <h3 className="font-medium">Sheriff’s Office - Poinciana</h3>
+                <h3 className="font-medium">Sheriff's Office - Poinciana</h3>
                 <p className="text-sm text-gray-600 cursor-pointer hover:underline" onClick={() => openMap('4547 Pleasant Hill Rd. Kissimmee 34758')}>
                   4547 Pleasant Hill Rd.<br />
                   Kissimmee, FL 34758
