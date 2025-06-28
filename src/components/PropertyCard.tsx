@@ -236,11 +236,11 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
           <>
             {/* Listed by and Floor Plan row */}
             <div className="flex justify-between items-center mb-4">
-              <span className="text-sm text-gray-600">
+              <span className="text-xs text-gray-600">
                 Listed by: <span className="font-medium">{property.listedBy}</span>
               </span>
               {showFloorPlanButton && (
-                <span className="text-sm text-gray-600">
+                <span className="text-xs text-gray-600">
                   Floor Plan: <a 
                     href={getFloorPlanUrl(modelName)}
                     target="_blank"
