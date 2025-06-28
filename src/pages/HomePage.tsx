@@ -63,19 +63,36 @@ export const HomePage: React.FC = () => {
     } else if (option === 'sqft-desc') {
       sorted.sort((a, b) => b.sqFt - a.sqFt);
     } else if (option === 'date-new') {
-      // Since we don't have actual listing dates, sort by ID (newer properties have higher IDs)
-      sorted.sort((a, b) => b.id - a.id);
+      // Sort by listing date (newest first)
+      sorted.sort((a, b) => {
+        const dateA = new Date(a.listedDate + 'T12:00:00');
+        const dateB = new Date(b.listedDate + 'T12:00:00');
+        return dateB.getTime() - dateA.getTime();
+      });
     } else if (option === 'date-old') {
-      // Sort by ID ascending (older properties have lower IDs)
-      sorted.sort((a, b) => a.id - b.id);
+      // Sort by listing date (oldest first)
+      sorted.sort((a, b) => {
+        const dateA = new Date(a.listedDate + 'T12:00:00');
+        const dateB = new Date(b.listedDate + 'T12:00:00');
+        return dateA.getTime() - dateB.getTime();
+      });
     }
     setSortedProperties(sorted);
     setSortOption(option);
     setCurrentPage(1);
   };
 
-  // Since we don't have actual listing dates, show current date
-  const formattedUpdateTime = new Date().toLocaleDateString('en-US', {
+  // Get the most recent listing date from properties
+  const latestUpdate = activeProperties.reduce((latest, property) => {
+    const propertyDate = new Date(property.listedDate + 'T12:00:00');
+    return propertyDate > latest ? propertyDate : latest;
+  }, new Date(0));
+
+  const formattedUpdateTime = latestUpdate.getTime() > 0 ? latestUpdate.toLocaleDateString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric'
+  }) : new Date().toLocaleDateString('en-US', {
     month: '2-digit',
     day: '2-digit',
     year: 'numeric'
@@ -233,8 +250,6 @@ export const HomePage: React.FC = () => {
                     disabled={currentPage === totalPages}
                     className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Next page"
-                  >
-                    <ChevronRight size={16} />
                   </button>
                 </div>
               </div>

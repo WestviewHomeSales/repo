@@ -176,6 +176,58 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
     return result
   }
 
+  // Enhanced date parsing function
+  const parseListedDate = (dateStr: any): string => {
+    console.log('📅 === PARSING LISTED DATE ===')
+    console.log('📅 Input value:', dateStr)
+    console.log('📅 Input type:', typeof dateStr)
+    
+    if (!dateStr) {
+      console.log('❌ No date provided, using current date')
+      return new Date().toISOString().split('T')[0]
+    }
+    
+    // Convert to string
+    const str = String(dateStr).trim()
+    console.log('📅 Date as string:', `"${str}"`)
+    
+    if (str === '' || str === 'null' || str === 'undefined') {
+      console.log('❌ Empty or null date string, using current date')
+      return new Date().toISOString().split('T')[0]
+    }
+    
+    try {
+      let date: Date
+      
+      // Handle different date formats
+      if (str.includes('/')) {
+        // Handle MM/DD/YYYY format
+        const [month, day, year] = str.split('/')
+        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+      } else if (str.includes('-')) {
+        // Handle YYYY-MM-DD format
+        date = new Date(str + 'T12:00:00')
+      } else {
+        // Try to parse as-is
+        date = new Date(str)
+      }
+      
+      // Check if the date is valid
+      if (isNaN(date.getTime())) {
+        console.log('❌ Invalid date, using current date')
+        return new Date().toISOString().split('T')[0]
+      }
+      
+      const result = date.toISOString().split('T')[0]
+      console.log(`✅ Final date parsing: "${dateStr}" -> ${result}`)
+      console.log('📅 === END PARSING LISTED DATE ===')
+      return result
+    } catch (error) {
+      console.log('❌ Error parsing date, using current date:', error)
+      return new Date().toISOString().split('T')[0]
+    }
+  }
+
   // Try to find price column with more variations
   const priceColumnNames = [
     'List Price', 'list price', 'price', 'Price', 'ListPrice', 'list_price', 
@@ -209,6 +261,17 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
   ]
   const sqftColumn = findColumn(sqftColumnNames)
   console.log('📐 Found sqft column:', sqftColumn)
+
+  // Try to find the Listed Date column
+  const listedDateColumnNames = [
+    'Listed Date', 'listed date', 'ListedDate', 'listed_date',
+    'Date Listed', 'date listed', 'DateListed', 'date_listed',
+    'List Date', 'list date', 'ListDate', 'list_date',
+    'Listing Date', 'listing date', 'ListingDate', 'listing_date',
+    'Date', 'date', 'DATE'
+  ]
+  const listedDateColumn = findColumn(listedDateColumnNames)
+  console.log('📅 Found listed date column:', listedDateColumn)
   
   // If we still can't find sqft column, let's check all columns that might contain numeric data
   if (!sqftColumn) {
@@ -226,16 +289,20 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
   // Get the actual values
   const priceValue = priceColumn ? activeProperty[priceColumn] : null
   const sqftValue = sqftColumn ? activeProperty[sqftColumn] : null
+  const listedDateValue = listedDateColumn ? activeProperty[listedDateColumn] : null
   
   console.log('💰 Price value from column:', priceValue)
   console.log('📐 SqFt value from column:', sqftValue)
+  console.log('📅 Listed date value from column:', listedDateValue)
   
   const price = parsePrice(priceValue)
   const sqFt = parseSqFt(sqftValue)
+  const listedDate = parseListedDate(listedDateValue)
   const pricePerSqFt = sqFt > 0 && price > 0 ? Math.round(price / sqFt) : 0
 
   console.log('💰 Final parsed price:', price)
   console.log('📐 Final parsed sqft:', sqFt)
+  console.log('📅 Final parsed listed date:', listedDate)
   console.log('💲 Price per sqft:', pricePerSqFt)
 
   // Map model name to image URL
@@ -295,9 +362,6 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
   const addressInfo = parseAddress(activeProperty.Address || '')
   console.log('🏠 Parsed address:', addressInfo)
 
-  // Use current date for listing date since there's no "Date Listed" column
-  const listedDate = new Date().toISOString().split('T')[0]
-
   // Generate URLs based on property ID and address
   const addressSlug = addressInfo.address.toLowerCase()
     .replace(/\s+/g, '-')
@@ -324,7 +388,7 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
     yearBuilt: 2025, // Default year for active properties
     lotSize: 0.05, // Default lot size
     listedBy: getBuilder(activeProperty.Model),
-    listedDate,
+    listedDate, // Now using the real listed date from the database
     propertyType: 'Single Family',
     // Use generated URLs since the schema doesn't show URL columns
     moreDetailsUrl: detailsUrl,
@@ -335,6 +399,7 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
   console.log('🏠 Final mapped property:', mappedProperty)
   console.log('💰 Price check - Column:', priceColumn, 'Original:', priceValue, 'Parsed:', price)
   console.log('📐 SqFt check - Column:', sqftColumn, 'Original:', sqftValue, 'Parsed:', sqFt)
+  console.log('📅 Listed Date check - Column:', listedDateColumn, 'Original:', listedDateValue, 'Parsed:', listedDate)
   console.log('================================')
   
   return mappedProperty
