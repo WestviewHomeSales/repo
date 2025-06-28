@@ -272,6 +272,26 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
   ]
   const listedDateColumn = findColumn(listedDateColumnNames)
   console.log('📅 Found listed date column:', listedDateColumn)
+
+  // Try to find URL columns from Supabase
+  const moreDetailsUrlColumnNames = [
+    'More Details URL', 'more details url', 'MoreDetailsURL', 'more_details_url',
+    'Details URL', 'details url', 'DetailsURL', 'details_url',
+    'Listing URL', 'listing url', 'ListingURL', 'listing_url',
+    'Property URL', 'property url', 'PropertyURL', 'property_url',
+    'URL', 'url', 'Link', 'link'
+  ]
+  const moreDetailsUrlColumn = findColumn(moreDetailsUrlColumnNames)
+  console.log('🔗 Found more details URL column:', moreDetailsUrlColumn)
+
+  const photoGalleryUrlColumnNames = [
+    'Photo Gallery URL', 'photo gallery url', 'PhotoGalleryURL', 'photo_gallery_url',
+    'Gallery URL', 'gallery url', 'GalleryURL', 'gallery_url',
+    'Photos URL', 'photos url', 'PhotosURL', 'photos_url',
+    'Images URL', 'images url', 'ImagesURL', 'images_url'
+  ]
+  const photoGalleryUrlColumn = findColumn(photoGalleryUrlColumnNames)
+  console.log('📸 Found photo gallery URL column:', photoGalleryUrlColumn)
   
   // If we still can't find sqft column, let's check all columns that might contain numeric data
   if (!sqftColumn) {
@@ -290,10 +310,14 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
   const priceValue = priceColumn ? activeProperty[priceColumn] : null
   const sqftValue = sqftColumn ? activeProperty[sqftColumn] : null
   const listedDateValue = listedDateColumn ? activeProperty[listedDateColumn] : null
+  const moreDetailsUrlValue = moreDetailsUrlColumn ? activeProperty[moreDetailsUrlColumn] : null
+  const photoGalleryUrlValue = photoGalleryUrlColumn ? activeProperty[photoGalleryUrlColumn] : null
   
   console.log('💰 Price value from column:', priceValue)
   console.log('📐 SqFt value from column:', sqftValue)
   console.log('📅 Listed date value from column:', listedDateValue)
+  console.log('🔗 More details URL value from column:', moreDetailsUrlValue)
+  console.log('📸 Photo gallery URL value from column:', photoGalleryUrlValue)
   
   const price = parsePrice(priceValue)
   const sqFt = parseSqFt(sqftValue)
@@ -362,15 +386,33 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
   const addressInfo = parseAddress(activeProperty.Address || '')
   console.log('🏠 Parsed address:', addressInfo)
 
-  // Generate URLs based on property ID and address
-  const addressSlug = addressInfo.address.toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '')
+  // Generate fallback URLs if not found in database
+  const generateFallbackUrls = () => {
+    const addressSlug = addressInfo.address.toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
 
-  const baseUrl = 'http://borchinirealty.idxbroker.com/idx'
-  const listingId = `O${id.toString().padStart(7, '0')}`
-  const detailsUrl = `${baseUrl}/details/listing/d003/${listingId}/${addressSlug}-kissimmee-fl`
-  const galleryUrl = `${baseUrl}/photogallery/d003/${listingId}`
+    const baseUrl = 'http://borchinirealty.idxbroker.com/idx'
+    const listingId = `O${id.toString().padStart(7, '0')}`
+    const detailsUrl = `${baseUrl}/details/listing/d003/${listingId}/${addressSlug}-kissimmee-fl`
+    const galleryUrl = `${baseUrl}/photogallery/d003/${listingId}`
+
+    return { detailsUrl, galleryUrl }
+  }
+
+  const fallbackUrls = generateFallbackUrls()
+
+  // Use URLs from database if available, otherwise use generated fallback URLs
+  const moreDetailsUrl = moreDetailsUrlValue && moreDetailsUrlValue.trim() !== '' 
+    ? moreDetailsUrlValue.trim() 
+    : fallbackUrls.detailsUrl
+
+  const photoGalleryUrl = photoGalleryUrlValue && photoGalleryUrlValue.trim() !== '' 
+    ? photoGalleryUrlValue.trim() 
+    : fallbackUrls.galleryUrl
+
+  console.log('🔗 Final more details URL:', moreDetailsUrl)
+  console.log('📸 Final photo gallery URL:', photoGalleryUrl)
 
   const mappedProperty: Property = {
     id,
@@ -390,9 +432,9 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
     listedBy: getBuilder(activeProperty.Model),
     listedDate, // Now using the real listed date from the database
     propertyType: 'Single Family',
-    // Use generated URLs since the schema doesn't show URL columns
-    moreDetailsUrl: detailsUrl,
-    photoGalleryUrl: galleryUrl
+    // Use URLs from database or fallback to generated URLs
+    moreDetailsUrl,
+    photoGalleryUrl
   }
 
   console.log('✅ === MAPPED PROPERTY RESULT ===')
@@ -400,6 +442,8 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
   console.log('💰 Price check - Column:', priceColumn, 'Original:', priceValue, 'Parsed:', price)
   console.log('📐 SqFt check - Column:', sqftColumn, 'Original:', sqftValue, 'Parsed:', sqFt)
   console.log('📅 Listed Date check - Column:', listedDateColumn, 'Original:', listedDateValue, 'Parsed:', listedDate)
+  console.log('🔗 More Details URL check - Column:', moreDetailsUrlColumn, 'Original:', moreDetailsUrlValue, 'Final:', moreDetailsUrl)
+  console.log('📸 Photo Gallery URL check - Column:', photoGalleryUrlColumn, 'Original:', photoGalleryUrlValue, 'Final:', photoGalleryUrl)
   console.log('================================')
   
   return mappedProperty

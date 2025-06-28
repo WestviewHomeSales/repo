@@ -59,9 +59,20 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
   const modelName = getModelName();
   const showFloorPlanButton = modelName && hasFloorPlan(modelName);
 
-  // Use the URLs from the property object (generated in the mapper)
+  // Use the URLs from the property object (from Supabase or generated fallbacks)
   const detailsUrl = property.moreDetailsUrl || '#';
   const galleryUrl = property.photoGalleryUrl || '#';
+
+  // Validate URLs before using them
+  const isValidUrl = (url: string): boolean => {
+    if (!url || url === '#') return false;
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   // Format the listed date for display - now using real dates from the database
   const formatListedDate = (dateString: string): string => {
@@ -202,24 +213,37 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
               </span>
             </div>
 
-            {/* Action buttons */}
+            {/* Action buttons - only show if URLs are valid */}
             <div className="space-y-2">
-              <a
-                href={detailsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded font-medium hover:bg-blue-700 transition-colors block text-center"
-              >
-                More Details
-              </a>
-              <a
-                href={galleryUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full bg-white text-blue-600 border border-blue-600 py-2 px-4 rounded font-medium hover:bg-blue-50 transition-colors block text-center"
-              >
-                Photo Gallery
-              </a>
+              {isValidUrl(detailsUrl) ? (
+                <a
+                  href={detailsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded font-medium hover:bg-blue-700 transition-colors block text-center"
+                >
+                  More Details
+                </a>
+              ) : (
+                <div className="w-full bg-gray-400 text-white py-2 px-4 rounded font-medium text-center cursor-not-allowed">
+                  More Details (URL Not Available)
+                </div>
+              )}
+              
+              {isValidUrl(galleryUrl) ? (
+                <a
+                  href={galleryUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-white text-blue-600 border border-blue-600 py-2 px-4 rounded font-medium hover:bg-blue-50 transition-colors block text-center"
+                >
+                  Photo Gallery
+                </a>
+              ) : (
+                <div className="w-full bg-gray-100 text-gray-400 border border-gray-300 py-2 px-4 rounded font-medium text-center cursor-not-allowed">
+                  Photo Gallery (URL Not Available)
+                </div>
+              )}
             </div>
           </>
         )}
