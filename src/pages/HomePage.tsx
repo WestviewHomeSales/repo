@@ -30,9 +30,19 @@ export const HomePage: React.FC = () => {
     } else if (option === 'sqft-desc') {
       sorted.sort((a, b) => b.sqFt - a.sqFt);
     } else if (option === 'date-new') {
-      sorted.sort((a, b) => new Date(b.listedDate + 'T12:00:00').getTime() - new Date(a.listedDate + 'T12:00:00').getTime());
+      sorted.sort((a, b) => {
+        // Parse dates as local dates to avoid timezone issues
+        const dateA = new Date(a.listedDate + 'T12:00:00');
+        const dateB = new Date(b.listedDate + 'T12:00:00');
+        return dateB.getTime() - dateA.getTime();
+      });
     } else if (option === 'date-old') {
-      sorted.sort((a, b) => new Date(a.listedDate + 'T12:00:00').getTime() - new Date(b.listedDate + 'T12:00:00').getTime());
+      sorted.sort((a, b) => {
+        // Parse dates as local dates to avoid timezone issues
+        const dateA = new Date(a.listedDate + 'T12:00:00');
+        const dateB = new Date(b.listedDate + 'T12:00:00');
+        return dateA.getTime() - dateB.getTime();
+      });
     }
     setSortedProperties(sorted);
     setSortOption(option);
@@ -41,7 +51,8 @@ export const HomePage: React.FC = () => {
 
   // Get the most recent listed date from properties
   const latestUpdate = properties.reduce((latest, property) => {
-    const propertyDate = new Date(property.listedDate + 'T12:00:00'); // Add noon time to avoid timezone issues
+    // Parse date as local date to avoid timezone issues
+    const propertyDate = new Date(property.listedDate + 'T12:00:00');
     return propertyDate > latest ? propertyDate : latest;
   }, new Date(0));
 

@@ -127,9 +127,10 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
   const showFloorPlanButton = modelName && hasFloorPlan(modelName);
   const { detailsUrl, galleryUrl } = generateIdxUrls();
 
-  // Format the listed date for display
+  // Format the listed date for display - fix timezone issue
   const formatListedDate = (dateString: string): string => {
-    const date = new Date(dateString);
+    // Parse as local date to avoid timezone conversion issues
+    const date = new Date(dateString + 'T12:00:00');
     return date.toLocaleDateString('en-US', {
       month: '2-digit',
       day: '2-digit',
@@ -158,7 +159,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
         {/* Show sold date in green tag on Sold page */}
         {isSoldPage && property.soldDate && (
           <div className="absolute top-4 right-4 bg-green-600 text-white px-2 py-1 rounded text-xs">
-            Sold: {new Date(property.soldDate).toLocaleDateString()}
+            Sold: {new Date(property.soldDate + 'T12:00:00').toLocaleDateString()}
           </div>
         )}
       </div>
