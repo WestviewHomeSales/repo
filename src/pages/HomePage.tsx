@@ -29,6 +29,17 @@ export const HomePage: React.FC = () => {
       setError(null);
       console.log('Loading active properties...');
       
+      // Check if environment variables are set
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      
+      if (!supabaseUrl || !supabaseKey || supabaseUrl === 'your_supabase_url_here' || supabaseKey === 'your_supabase_anon_key_here') {
+        console.warn('Supabase environment variables not configured properly');
+        setError('Database connection not configured. Please set up Supabase environment variables.');
+        setLoading(false);
+        return;
+      }
+      
       const data = await fetchActiveProperties();
       console.log('Raw active data from Supabase:', data);
       
@@ -46,7 +57,7 @@ export const HomePage: React.FC = () => {
       sortProperties(mappedProperties, 'date-new');
     } catch (err) {
       console.error('Error loading active properties:', err);
-      setError('Failed to load active properties. Please try again later.');
+      setError('Failed to load active properties. Please check your database connection.');
     } finally {
       setLoading(false);
     }
@@ -106,8 +117,17 @@ export const HomePage: React.FC = () => {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-6 md:py-10">
+        <div className="max-w-3xl">
+          <h1 className="text-2xl md:text-4xl font-bold mb-2">
+            Find Your <span className="text-blue-600">Dream Home</span> in Westview
+          </h1>
+          <p className="text-gray-600 mb-6 md:mb-8 text-sm md:text-base">
+            Browse our current listings in the beautiful Westview community of Poinciana, Florida. 
+            Discover affordable luxury in a family-friendly neighborhood.
+          </p>
+        </div>
         <div className="flex justify-center items-center min-h-64">
-          <div className="text-lg text-gray-600">Loading active properties from Supabase...</div>
+          <div className="text-lg text-gray-600">Loading properties...</div>
         </div>
       </div>
     );
@@ -120,11 +140,24 @@ export const HomePage: React.FC = () => {
           <h1 className="text-2xl md:text-4xl font-bold mb-2">
             Find Your <span className="text-blue-600">Dream Home</span> in Westview
           </h1>
+          <p className="text-gray-600 mb-6 md:mb-8 text-sm md:text-base">
+            Browse our current listings in the beautiful Westview community of Poinciana, Florida. 
+            Discover affordable luxury in a family-friendly neighborhood.
+          </p>
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-6">
-            <p className="text-red-800">{error}</p>
+            <h3 className="text-red-800 font-medium mb-2">Database Connection Issue</h3>
+            <p className="text-red-700 mb-4">{error}</p>
+            <div className="space-y-2">
+              <p className="text-sm text-red-600">To fix this issue:</p>
+              <ol className="text-sm text-red-600 list-decimal list-inside space-y-1">
+                <li>Create a <code className="bg-red-100 px-1 rounded">.env</code> file in your project root</li>
+                <li>Add your Supabase URL and API key to the .env file</li>
+                <li>Restart the development server</li>
+              </ol>
+            </div>
             <button 
               onClick={loadActiveProperties}
-              className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
             >
               Try Again
             </button>
@@ -211,8 +244,8 @@ export const HomePage: React.FC = () => {
 
         {activeProperties.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">No active properties found in Supabase.</p>
-            <p className="text-gray-500 text-sm mt-2">Check the browser console for connection details.</p>
+            <p className="text-gray-600 text-lg">No active properties found.</p>
+            <p className="text-gray-500 text-sm mt-2">Please check your database connection or contact support.</p>
             <button 
               onClick={loadActiveProperties}
               className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
