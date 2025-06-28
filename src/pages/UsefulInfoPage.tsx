@@ -170,7 +170,7 @@ export const UsefulInfoPage: React.FC = () => {
                   <a href={`tel:${'863-534-4700'}`} className="hover:underline"><strong>{formatPhoneNumber('863-534-4700')}</strong></a>
                 </p>
                 <a
-                  href="https://www.polktaxes.com/"
+                  href="https://osceolataxcollector.org/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 text-sm hover:underline flex items-center mt-1"
@@ -277,13 +277,12 @@ export const UsefulInfoPage: React.FC = () => {
                 </a>
               </li>
               <li>
-                <h3 className="font-medium">Waste Management</h3>
+                <h3 className="font-medium">Frontier Communications</h3>
                 <p className="text-sm text-gray-600">
-                  <a href={`tel:${'407-843-1700'}`} className="hover:underline"><strong>{formatPhoneNumber('407-843-1700')}</strong></a>
+                  <a href={`tel:${'888-616-6305'}`} className="hover:underline"><strong>{formatPhoneNumber('888-616-6305')}</strong></a>
                 </p>
-                <p className="text-sm text-gray-600">Garbage & Recycling Services</p>
                 <a
-                  href="https://www.wm.com/"
+                  href="https://frontier.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 text-sm hover:underline flex items-center mt-1"
@@ -292,13 +291,12 @@ export const UsefulInfoPage: React.FC = () => {
                 </a>
               </li>
               <li>
-                <h3 className="font-medium">Polk County Solid Waste Division</h3>
+                <h3 className="font-medium">Hotwire Communications</h3>
                 <p className="text-sm text-gray-600">
-                  <a href={`tel:${'863-284-4319'}`} className="hover:underline"><strong>{formatPhoneNumber('863-284-4319')}</strong></a>
+                  <a href={`tel:${'833-354-2289'}`} className="hover:underline"><strong>{formatPhoneNumber('833-354-2289')}</strong></a>
                 </p>
-                <p className="text-sm text-gray-600">Garbage & Recycling Services</p>
                 <a
-                  href="https://www.polk-county.net/services/polk-county-solid-waste/"
+                  href="https://gethotwired.com/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 text-sm hover:underline flex items-center mt-1"

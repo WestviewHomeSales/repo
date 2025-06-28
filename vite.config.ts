@@ -5,8 +5,8 @@ import { resolve } from 'path';
 export default defineConfig({
   plugins: [react()],
   // Set base to '' to ensure truly relative paths for assets in the build output.
-  // This fixes issues when deploying to a subfolder on a server or when the FTP client
-  // misinterprets absolute paths.
+  // This is crucial for deployments to subfolders on a server or via FTP,
+  // as it prevents paths from being interpreted as absolute from the domain root.
   base: '',
   optimizeDeps: {
     exclude: ['lucide-react'],

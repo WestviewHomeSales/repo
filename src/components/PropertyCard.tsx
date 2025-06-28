@@ -79,10 +79,13 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
     e.preventDefault();
     e.stopPropagation();
 
+    // Use the property's moreDetailsUrl for sharing
+    const shareUrl = isValidUrl(property.moreDetailsUrl || '') ? property.moreDetailsUrl : window.location.href;
+
     const shareData = {
       title: `${formatPrice(property.price)} - ${property.address}`,
       text: `Check out this ${property.beds} bed, ${property.baths} bath home in ${property.city}, ${property.state}. ${property.sqFt.toLocaleString()} sq ft for ${formatPrice(property.price)}.`,
-      url: window.location.href
+      url: shareUrl || window.location.href // Fallback to current URL if property URL is invalid
     };
 
     try {

@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "cat dist/index.html",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "prepare-ftp": "node scripts/prepare-ftp.js"
+    "prepare-ftp": "npm run build && node scripts/prepare-ftp.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.42.0",

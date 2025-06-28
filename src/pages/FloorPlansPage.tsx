@@ -27,7 +27,7 @@ const FloorPlanCard: React.FC<{ plan: FloorPlan }> = ({ plan }) => {
             <Square size={16} className="text-gray-500" />
           </div>
           <span className="text-lg font-semibold">{plan.sqft}</span>
-          <span className="text-xs text-gray-500 uppercase tracking-wide">SQ.FT</span>
+          <span className="text-xs text-gray-500 uppercase tracking-wide">SQ FT</span>
         </div>
         <div className="flex flex-col items-center">
           <div className="flex items-center mb-1">

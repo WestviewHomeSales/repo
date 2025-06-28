@@ -1,41 +1,30 @@
-import { copyFile, mkdir, readdir, access } from 'fs/promises';
-import { join } from 'path';
-import { constants } from 'fs';
+import { promises as fs } from 'fs';
+import path from 'path';
 
-async function copyFiles(src, dest) {
+const distDir = path.resolve(process.cwd(), 'dist');
+const ftpReadyDir = path.resolve(process.cwd(), 'ftp-ready');
+
+async function prepareForFtp() {
   try {
-    await mkdir(dest, { recursive: true });
-    const files = await readdir(src, { withFileTypes: true });
-    
-    for (const file of files) {
-      const srcPath = join(src, file.name);
-      const destPath = join(dest, file.name);
-      
-      if (file.isDirectory()) {
-        await copyFiles(srcPath, destPath);
-      } else {
-        await copyFile(srcPath, destPath);
-      }
-    }
-  } catch (err) {
-    console.error('Error preparing files for FTP:', err);
+    // 1. Remove existing ftp-ready directory if it exists
+    await fs.rm(ftpReadyDir, { recursive: true, force: true });
+    console.log(`Removed existing ${ftpReadyDir}`);
+
+    // 2. Create a new ftp-ready directory
+    await fs.mkdir(ftpReadyDir, { recursive: true });
+    console.log(`Created ${ftpReadyDir}`);
+
+    // 3. Copy contents of dist to ftp-ready
+    await fs.cp(distDir, ftpReadyDir, { recursive: true });
+    console.log(`Copied contents from ${distDir} to ${ftpReadyDir}`);
+
+    console.log('\nWebsite prepared for FTP deployment in the "ftp-ready" folder.');
+    console.log('Please upload the *contents* of the "ftp-ready" folder to your web server.');
+
+  } catch (error) {
+    console.error('Error preparing for FTP deployment:', error);
     process.exit(1);
   }
 }
 
-async function main() {
-  try {
-    // First, ensure the ftp-ready directory exists and is clean
-    await mkdir('ftp-ready', { recursive: true });
-    
-    // Copy the entire dist directory to ftp-ready
-    await copyFiles('dist', 'ftp-ready');
-    
-    console.log('Files prepared for FTP upload in ftp-ready directory');
-  } catch (err) {
-    console.error('Error in main process:', err);
-    process.exit(1);
-  }
-}
-
-main();
+prepareForFtp();
