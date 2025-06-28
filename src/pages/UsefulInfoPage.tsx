@@ -633,7 +633,7 @@ export const UsefulInfoPage: React.FC = () => {
               <li>
                 <h3 className="font-medium">Rideshare Services</h3>
                 <p className="text-sm text-gray-600">
-                  <a href="https://www.uber.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Uber</a> and <a href="https://www.lyft.com/" target=\"_blank" rel="noopener noreferrer\" className="text-blue-600 hover:underline">Lyft</a> available throughout the area
+                  <a href="https://www.uber.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Uber</a> and <a href="https://www.lyft.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Lyft</a> available throughout the area
                 </p>
               </li>
             </ul>
