@@ -234,13 +234,17 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
         {/* Current Listings page layout */}
         {!isSoldPage && (
           <>
-            {/* Listed by and Floor Plan on same line with same font size */}
+            {/* Listed by and Floor Plan in separate rows with same font size */}
             <div className="mb-4">
-              <span className="text-sm text-gray-600">
-                Listed by: <span className="font-medium">{property.listedBy}</span>
-                {showFloorPlanButton && (
-                  <>
-                    {' | '}Floor Plan: <a 
+              <div className="mb-2">
+                <span className="text-sm text-gray-600">
+                  Listed by: <span className="font-medium">{property.listedBy}</span>
+                </span>
+              </div>
+              {showFloorPlanButton && (
+                <div>
+                  <span className="text-sm text-gray-600">
+                    Floor Plan: <a 
                       href={getFloorPlanUrl(modelName)}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -248,9 +252,9 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
                     >
                       {modelName}
                     </a>
-                  </>
-                )}
-              </span>
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Action buttons */}
