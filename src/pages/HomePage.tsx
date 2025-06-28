@@ -148,7 +148,7 @@ export const HomePage: React.FC = () => {
 
       <div className="mb-6 md:mb-8">
         <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">
-          Current Listings ({activeProperties.length} properties)
+          Current Listings
         </h2>
         
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
