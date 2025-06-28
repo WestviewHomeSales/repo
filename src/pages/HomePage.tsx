@@ -250,6 +250,8 @@ export const HomePage: React.FC = () => {
                     disabled={currentPage === totalPages}
                     className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Next page"
+                  >
+                    <ChevronRight size={16} />
                   </button>
                 </div>
               </div>
