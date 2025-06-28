@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bed, Bath, Square, MapPin } from 'lucide-react';
+import { Bed, Bath, Square } from 'lucide-react';
 import { Property } from '../types/property';
 import { formatPrice } from '../utils/formatters';
 
@@ -168,12 +168,9 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
           <h3 className="text-xl font-bold text-gray-800 mb-1">
             {formatPrice(property.price)}
           </h3>
-          <div className="flex items-start text-gray-600">
-            <MapPin size={14} className="mr-1 mt-0.5 flex-shrink-0" />
-            <div className="flex flex-col text-base">
-              <span>{property.address}</span>
-              <span>{property.city}, {property.state} {property.zip}</span>
-            </div>
+          <div className="flex flex-col text-base text-gray-600">
+            <span>{property.address}</span>
+            <span>{property.city}, {property.state} {property.zip}</span>
           </div>
         </div>
 
