@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Bed, Bath, Square } from 'lucide-react';
 import { taylorMorrisonNeighborhoods, lennarNeighborhoods } from '../data/floorPlans';
 
 interface FloorPlan {
@@ -20,19 +20,28 @@ interface Neighborhood {
 const FloorPlanCard: React.FC<{ plan: FloorPlan }> = ({ plan }) => {
   return (
     <div className="bg-white p-4 rounded-md shadow-md">
-      <h3 className="text-lg font-semibold">{plan.name}</h3>
-      <div className="grid grid-cols-3 gap-3 my-4 text-center">
-        <div>
-          <p className="font-medium">{plan.sqft}</p>
-          <p className="text-xs text-gray-500">SQ.FT</p>
+      <h3 className="text-lg font-semibold mb-4">{plan.name}</h3>
+      <div className="grid grid-cols-3 gap-3 mb-4 text-center">
+        <div className="flex flex-col items-center">
+          <div className="flex items-center mb-1">
+            <Square size={16} className="text-gray-500" />
+          </div>
+          <span className="text-lg font-semibold">{plan.sqft}</span>
+          <span className="text-xs text-gray-500 uppercase tracking-wide">SQ.FT</span>
         </div>
-        <div>
-          <p className="font-medium">{plan.beds}</p>
-          <p className="text-xs text-gray-500">BEDS</p>
+        <div className="flex flex-col items-center">
+          <div className="flex items-center mb-1">
+            <Bed size={16} className="text-gray-500" />
+          </div>
+          <span className="text-lg font-semibold">{plan.beds}</span>
+          <span className="text-xs text-gray-500 uppercase tracking-wide">BEDS</span>
         </div>
-        <div>
-          <p className="font-medium">{plan.baths}</p>
-          <p className="text-xs text-gray-500">BATHS</p>
+        <div className="flex flex-col items-center">
+          <div className="flex items-center mb-1">
+            <Bath size={16} className="text-gray-500" />
+          </div>
+          <span className="text-lg font-semibold">{plan.baths}</span>
+          <span className="text-xs text-gray-500 uppercase tracking-wide">BATHS</span>
         </div>
       </div>
       <a
