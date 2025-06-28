@@ -1,26 +1,52 @@
 import React, { useEffect, useState } from 'react';
 import { Clock, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { PropertyCard } from '../components/PropertyCard';
-import { properties } from '../data/properties';
 import { Property } from '../types/property';
+import { fetchActiveProperties } from '../lib/supabase';
+import { mapActivePropertyToProperty } from '../utils/propertyMapper';
 
 export const HomePage: React.FC = () => {
-  const [sortedProperties, setSortedProperties] = useState<Property[]>(properties);
+  const [activeProperties, setActiveProperties] = useState<Property[]>([]);
+  const [sortedProperties, setSortedProperties] = useState<Property[]>([]);
   const [sortOption, setSortOption] = useState('date-new');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     document.title = 'Borchini Realty | Current Listings';
-    sortProperties('date-new');
+    loadActiveProperties();
   }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [currentPage]);
 
-  const sortProperties = (option: string) => {
-    const sorted = [...properties];
+  const loadActiveProperties = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      console.log('Loading active properties...');
+      
+      const data = await fetchActiveProperties();
+      console.log('Raw active data from Supabase:', data);
+      
+      const mappedProperties = data.map(mapActivePropertyToProperty);
+      console.log('Mapped active properties:', mappedProperties);
+      
+      setActiveProperties(mappedProperties);
+      sortProperties(mappedProperties, 'date-new');
+    } catch (err) {
+      console.error('Error loading active properties:', err);
+      setError('Failed to load active properties. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sortProperties = (props: Property[], option: string) => {
+    const sorted = [...props];
     if (option === 'price-asc') {
       sorted.sort((a, b) => a.price - b.price);
     } else if (option === 'price-desc') {
@@ -50,22 +76,53 @@ export const HomePage: React.FC = () => {
   };
 
   // Get the most recent listed date from properties
-  const latestUpdate = properties.reduce((latest, property) => {
+  const latestUpdate = activeProperties.reduce((latest, property) => {
     // Parse date as local date to avoid timezone issues
     const propertyDate = new Date(property.listedDate + 'T12:00:00');
     return propertyDate > latest ? propertyDate : latest;
   }, new Date(0));
 
-  const formattedUpdateTime = latestUpdate.toLocaleDateString('en-US', {
+  const formattedUpdateTime = latestUpdate.getTime() > 0 ? latestUpdate.toLocaleDateString('en-US', {
     month: '2-digit',
     day: '2-digit',
     year: 'numeric'
-  });
+  }) : 'No data available';
 
   const totalPages = itemsPerPage === 0 ? 1 : Math.ceil(sortedProperties.length / itemsPerPage);
   const startIndex = itemsPerPage === 0 ? 0 : (currentPage - 1) * itemsPerPage;
   const endIndex = itemsPerPage === 0 ? sortedProperties.length : startIndex + itemsPerPage;
   const currentProperties = sortedProperties.slice(startIndex, endIndex);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-6 md:py-10">
+        <div className="flex justify-center items-center min-h-64">
+          <div className="text-lg text-gray-600">Loading active properties from Supabase...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-6 md:py-10">
+        <div className="max-w-3xl">
+          <h1 className="text-2xl md:text-4xl font-bold mb-2">
+            Find Your <span className="text-blue-600">Dream Home</span> in Westview
+          </h1>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-6">
+            <p className="text-red-800">{error}</p>
+            <button 
+              onClick={loadActiveProperties}
+              className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-6 md:py-10">
@@ -112,7 +169,7 @@ export const HomePage: React.FC = () => {
               className={`text-xs md:text-sm flex items-center px-3 py-1 rounded-md transition-colors ${
                 sortOption.startsWith('date') ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
               }`}
-              onClick={() => sortProperties(sortOption.startsWith('date') ? 'date-old' : 'date-new')}
+              onClick={() => sortProperties(activeProperties, sortOption.startsWith('date') ? 'date-old' : 'date-new')}
             >
               <span className="mr-2">Date</span>
               <ChevronDown size={14} />
@@ -122,7 +179,7 @@ export const HomePage: React.FC = () => {
               className={`text-xs md:text-sm flex items-center px-3 py-1 rounded-md transition-colors ${
                 sortOption.startsWith('price') ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
               }`}
-              onClick={() => sortProperties(sortOption.startsWith('price') ? 'price-desc' : 'price-asc')}
+              onClick={() => sortProperties(activeProperties, sortOption.startsWith('price') ? 'price-desc' : 'price-asc')}
             >
               <span className="mr-2">Price</span>
               <ChevronDown size={14} />
@@ -132,7 +189,7 @@ export const HomePage: React.FC = () => {
               className={`text-xs md:text-sm flex items-center px-3 py-1 rounded-md transition-colors ${
                 sortOption.startsWith('sqft') ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
               }`}
-              onClick={() => sortProperties(sortOption.startsWith('sqft') ? 'sqft-desc' : 'sqft-asc')}
+              onClick={() => sortProperties(activeProperties, sortOption.startsWith('sqft') ? 'sqft-desc' : 'sqft-asc')}
             >
               <span className="mr-2">Sq Ft</span>
               <ChevronDown size={14} />
@@ -140,39 +197,54 @@ export const HomePage: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {currentProperties.map((property) => (
-            <PropertyCard key={property.id} property={property} />
-          ))}
-        </div>
-
-        {totalPages > 1 && (
-          <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-600">
-              Showing {startIndex + 1}-{Math.min(endIndex, sortedProperties.length)} of {sortedProperties.length} listings
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Previous page"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <span className="text-sm text-gray-600">
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Next page"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
+        {activeProperties.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600 text-lg">No active properties found in Supabase.</p>
+            <p className="text-gray-500 text-sm mt-2">Check the browser console for connection details.</p>
+            <button 
+              onClick={loadActiveProperties}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              Retry Loading
+            </button>
           </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {currentProperties.map((property) => (
+                <PropertyCard key={property.id} property={property} />
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex justify-between items-center">
+                <div className="text-sm text-gray-600">
+                  Showing {startIndex + 1}-{Math.min(endIndex, sortedProperties.length)} of {sortedProperties.length} listings
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Previous page"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <span className="text-sm text-gray-600">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Next page"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

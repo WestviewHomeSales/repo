@@ -18,6 +18,19 @@ export interface SoldPropertyData {
   Status: string
 }
 
+export interface ActivePropertyData {
+  ID: number
+  "Date Sold": string | null
+  "List Price": string
+  "Sold Price": string | null
+  Address: string
+  "Square Feet": string
+  Model: string
+  Beds: number
+  Baths: number
+  Status: string
+}
+
 export async function fetchSoldProperties(): Promise<SoldPropertyData[]> {
   try {
     console.log('Fetching sold properties from Supabase...')
@@ -46,6 +59,27 @@ export async function fetchSoldProperties(): Promise<SoldPropertyData[]> {
     return combinedData
   } catch (error) {
     console.error('Error fetching sold properties:', error)
+    return []
+  }
+}
+
+export async function fetchActiveProperties(): Promise<ActivePropertyData[]> {
+  try {
+    console.log('Fetching active properties from Supabase...')
+    
+    const { data, error } = await supabase
+      .from('westviewactive')
+      .select('*')
+    
+    if (error) {
+      console.error('Error fetching active properties:', error)
+      return []
+    }
+
+    console.log(`Fetched ${data?.length || 0} active properties`)
+    return data || []
+  } catch (error) {
+    console.error('Error fetching active properties:', error)
     return []
   }
 }
