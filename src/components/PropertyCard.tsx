@@ -44,7 +44,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
     return availableFloorPlans.includes(cleanModelName);
   };
 
-  // Extract model name from the image URL or listedBy
+  // Extract model name from the image URL or use a property field
   const getModelName = (): string => {
     // Try to extract model from the image URL
     if (property.imageUrl && property.imageUrl.includes('/models/')) {

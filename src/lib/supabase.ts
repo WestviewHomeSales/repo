@@ -20,15 +20,15 @@ export interface SoldPropertyData {
 
 export interface ActivePropertyData {
   ID: number
+  "Date Sold"?: string
   "List Price": string
+  "Sold Price"?: string
   Address: string
   "Square Feet": string
   Model: string
   Beds: number
   Baths: number
   Status: string
-  // Note: Based on your schema, there's no "Date Listed" column in westviewactive
-  // We'll use a default date or the current date
 }
 
 export async function fetchSoldProperties(): Promise<SoldPropertyData[]> {
@@ -79,6 +79,15 @@ export async function fetchActiveProperties(): Promise<ActivePropertyData[]> {
     console.log(`Fetched ${data?.length || 0} active properties`)
     console.log('Sample active property data:', data?.[0])
     console.log('Available columns:', data?.[0] ? Object.keys(data[0]) : 'No data')
+    
+    // Log each property to see the actual data structure
+    if (data && data.length > 0) {
+      console.log('First 3 properties raw data:')
+      data.slice(0, 3).forEach((prop, index) => {
+        console.log(`Property ${index + 1}:`, prop)
+      })
+    }
+    
     return data || []
   } catch (error) {
     console.error('Error fetching active properties:', error)

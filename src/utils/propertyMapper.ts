@@ -56,34 +56,53 @@ export function mapSoldPropertyToProperty(soldProperty: SoldPropertyData): Prope
 }
 
 export function mapActivePropertyToProperty(activeProperty: ActivePropertyData): Property {
-  console.log('Mapping active property:', activeProperty)
-  console.log('Available keys in active property:', Object.keys(activeProperty))
+  console.log('=== MAPPING ACTIVE PROPERTY ===')
+  console.log('Raw property data:', activeProperty)
+  console.log('Available keys:', Object.keys(activeProperty))
   
   // Use the ID from the database
   const id = activeProperty.ID
 
-  // Parse price from string (remove $ and commas)
-  const parsePrice = (priceStr: string): number => {
+  // Parse price from string (remove $ and commas) - try both "List Price" and "Sold Price"
+  const parsePrice = (priceStr: string | undefined): number => {
     if (!priceStr) {
       console.log('No price string provided:', priceStr)
       return 0
     }
-    const cleaned = priceStr.replace(/[$,]/g, '')
-    const parsed = parseInt(cleaned) || 0
-    console.log(`Parsing price: "${priceStr}" -> "${cleaned}" -> ${parsed}`)
-    return parsed
+    
+    // Handle different price formats
+    let cleaned = String(priceStr).replace(/[$,\s]/g, '')
+    
+    // If it's already a number, return it
+    if (!isNaN(Number(cleaned))) {
+      const parsed = parseInt(cleaned) || 0
+      console.log(`Parsing price: "${priceStr}" -> "${cleaned}" -> ${parsed}`)
+      return parsed
+    }
+    
+    console.log(`Could not parse price: "${priceStr}"`)
+    return 0
   }
 
   // Parse square feet from string
-  const parseSqFt = (sqFtStr: string): number => {
+  const parseSqFt = (sqFtStr: string | undefined): number => {
     if (!sqFtStr) {
       console.log('No sqft string provided:', sqFtStr)
       return 0
     }
-    const cleaned = sqFtStr.replace(/[,]/g, '')
-    const parsed = parseInt(cleaned) || 0
-    console.log(`Parsing sqft: "${sqFtStr}" -> "${cleaned}" -> ${parsed}`)
-    return parsed
+    
+    // Handle different sqft formats
+    let cleaned = String(sqFtStr).replace(/[,\s]/g, '')
+    
+    // If it's already a number, return it
+    if (!isNaN(Number(cleaned))) {
+      const parsed = parseInt(cleaned) || 0
+      console.log(`Parsing sqft: "${sqFtStr}" -> "${cleaned}" -> ${parsed}`)
+      return parsed
+    }
+    
+    console.log(`Could not parse sqft: "${sqFtStr}"`)
+    return 0
   }
 
   // Map model name to image URL
@@ -112,15 +131,53 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
     return 'Westview Builder'
   }
 
-  const price = parsePrice(activeProperty["List Price"])
+  // Try to get price from either "List Price" or "Sold Price" columns
+  const listPrice = activeProperty["List Price"]
+  const soldPrice = activeProperty["Sold Price"]
+  const priceToUse = listPrice || soldPrice
+  
+  console.log('Price fields:', { listPrice, soldPrice, priceToUse })
+  
+  const price = parsePrice(priceToUse)
   const sqFt = parseSqFt(activeProperty["Square Feet"])
   const pricePerSqFt = sqFt > 0 ? Math.round(price / sqFt) : 0
 
-  // Since there's no "Date Listed" column in westviewactive table, use current date
+  // Parse the address to avoid duplication
+  const parseAddress = (addressStr: string): { address: string, city: string, state: string, zip: string } => {
+    if (!addressStr) {
+      return { address: '', city: 'Kissimmee', state: 'FL', zip: '34758' }
+    }
+    
+    // Check if address already contains city, state, zip
+    const fullAddressPattern = /^(.+?),\s*([^,]+),\s*([A-Z]{2})\s*(\d{5})$/
+    const match = addressStr.match(fullAddressPattern)
+    
+    if (match) {
+      return {
+        address: match[1].trim(),
+        city: match[2].trim(),
+        state: match[3].trim(),
+        zip: match[4].trim()
+      }
+    }
+    
+    // If no match, assume it's just the street address
+    return {
+      address: addressStr.trim(),
+      city: 'Kissimmee',
+      state: 'FL',
+      zip: '34758'
+    }
+  }
+
+  const addressInfo = parseAddress(activeProperty.Address || '')
+  console.log('Parsed address:', addressInfo)
+
+  // Use current date for listing date since there's no "Date Listed" column
   const listedDate = new Date().toISOString().split('T')[0]
 
   // Generate URLs based on property ID and address
-  const addressSlug = (activeProperty.Address || '').toLowerCase()
+  const addressSlug = addressInfo.address.toLowerCase()
     .replace(/\s+/g, '-')
     .replace(/[^a-z0-9-]/g, '')
 
@@ -134,10 +191,10 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
     status: 'ACTIVE',
     imageUrl: getImageUrl(activeProperty.Model),
     price,
-    address: activeProperty.Address || '',
-    city: 'Kissimmee',
-    state: 'FL',
-    zip: '34758',
+    address: addressInfo.address,
+    city: addressInfo.city,
+    state: addressInfo.state,
+    zip: addressInfo.zip,
     beds: activeProperty.Beds || 0,
     baths: activeProperty.Baths || 0,
     sqFt,
@@ -152,6 +209,9 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
     photoGalleryUrl: galleryUrl
   }
 
-  console.log('Mapped property result:', mappedProperty)
+  console.log('=== MAPPED PROPERTY RESULT ===')
+  console.log('Final mapped property:', mappedProperty)
+  console.log('================================')
+  
   return mappedProperty
 }
