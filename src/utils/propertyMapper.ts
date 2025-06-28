@@ -57,6 +57,7 @@ export function mapSoldPropertyToProperty(soldProperty: SoldPropertyData): Prope
 
 export function mapActivePropertyToProperty(activeProperty: ActivePropertyData): Property {
   console.log('Mapping active property:', activeProperty)
+  console.log('Available keys in active property:', Object.keys(activeProperty))
   
   // Use the ID from the database
   const id = activeProperty.ID
@@ -115,20 +116,18 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
   const sqFt = parseSqFt(activeProperty["Square Feet"])
   const pricePerSqFt = sqFt > 0 ? Math.round(price / sqFt) : 0
 
-  // Parse the date listed or use current date
-  let listedDate = new Date().toISOString().split('T')[0] // Default to today
-  
-  if (activeProperty["Date Listed"]) {
-    try {
-      // Try to parse the date from the database
-      const parsedDate = new Date(activeProperty["Date Listed"])
-      if (!isNaN(parsedDate.getTime())) {
-        listedDate = parsedDate.toISOString().split('T')[0]
-      }
-    } catch (error) {
-      console.log('Error parsing date listed:', error)
-    }
-  }
+  // Since there's no "Date Listed" column in westviewactive table, use current date
+  const listedDate = new Date().toISOString().split('T')[0]
+
+  // Generate URLs based on property ID and address
+  const addressSlug = (activeProperty.Address || '').toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+
+  const baseUrl = 'http://borchinirealty.idxbroker.com/idx'
+  const listingId = `O${activeProperty.ID.toString().padStart(7, '0')}`
+  const detailsUrl = `${baseUrl}/details/listing/d003/${listingId}/${addressSlug}-kissimmee-fl`
+  const galleryUrl = `${baseUrl}/photogallery/d003/${listingId}`
 
   const mappedProperty: Property = {
     id,
@@ -148,9 +147,9 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
     listedBy: getBuilder(activeProperty.Model),
     listedDate,
     propertyType: 'Single Family',
-    // Store the URLs from Supabase for use in PropertyCard
-    moreDetailsUrl: activeProperty["More Details URL"] || '',
-    photoGalleryUrl: activeProperty["Photo Gallery URL"] || ''
+    // Use generated URLs since the schema doesn't show URL columns
+    moreDetailsUrl: detailsUrl,
+    photoGalleryUrl: galleryUrl
   }
 
   console.log('Mapped property result:', mappedProperty)

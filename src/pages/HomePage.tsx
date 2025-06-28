@@ -63,37 +63,23 @@ export const HomePage: React.FC = () => {
     } else if (option === 'sqft-desc') {
       sorted.sort((a, b) => b.sqFt - a.sqFt);
     } else if (option === 'date-new') {
-      sorted.sort((a, b) => {
-        // Parse dates as local dates to avoid timezone issues
-        const dateA = new Date(a.listedDate + 'T12:00:00');
-        const dateB = new Date(b.listedDate + 'T12:00:00');
-        return dateB.getTime() - dateA.getTime();
-      });
+      // Since we don't have actual listing dates, sort by ID (newer properties have higher IDs)
+      sorted.sort((a, b) => b.id - a.id);
     } else if (option === 'date-old') {
-      sorted.sort((a, b) => {
-        // Parse dates as local dates to avoid timezone issues
-        const dateA = new Date(a.listedDate + 'T12:00:00');
-        const dateB = new Date(b.listedDate + 'T12:00:00');
-        return dateA.getTime() - dateB.getTime();
-      });
+      // Sort by ID ascending (older properties have lower IDs)
+      sorted.sort((a, b) => a.id - b.id);
     }
     setSortedProperties(sorted);
     setSortOption(option);
     setCurrentPage(1);
   };
 
-  // Get the most recent listed date from properties
-  const latestUpdate = activeProperties.reduce((latest, property) => {
-    // Parse date as local date to avoid timezone issues
-    const propertyDate = new Date(property.listedDate + 'T12:00:00');
-    return propertyDate > latest ? propertyDate : latest;
-  }, new Date(0));
-
-  const formattedUpdateTime = latestUpdate.getTime() > 0 ? latestUpdate.toLocaleDateString('en-US', {
+  // Since we don't have actual listing dates, show current date
+  const formattedUpdateTime = new Date().toLocaleDateString('en-US', {
     month: '2-digit',
     day: '2-digit',
     year: 'numeric'
-  }) : 'No data available';
+  });
 
   const totalPages = itemsPerPage === 0 ? 1 : Math.ceil(sortedProperties.length / itemsPerPage);
   const startIndex = itemsPerPage === 0 ? 0 : (currentPage - 1) * itemsPerPage;
