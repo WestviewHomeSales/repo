@@ -234,10 +234,10 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
         {/* Current Listings page layout */}
         {!isSoldPage && (
           <>
-            {/* Listed by and Floor Plan in separate rows */}
+            {/* Listed by and Floor Plan in separate rows with same font size */}
             <div className="mb-4">
               <div className="mb-2">
-                <span className="text-xs text-gray-600">
+                <span className="text-sm text-gray-600">
                   Listed by: <span className="font-medium">{property.listedBy}</span>
                 </span>
               </div>
