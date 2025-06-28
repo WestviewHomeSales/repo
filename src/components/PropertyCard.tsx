@@ -106,7 +106,14 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
         }, 2000);
       }
     } catch (error) {
-      console.error('Error sharing:', error);
+      // Check if the error is due to user cancellation (AbortError)
+      if (error instanceof Error && error.name === 'AbortError') {
+        // User canceled the share dialog - this is normal behavior, don't log as error
+        console.log('Share dialog was canceled by user');
+      } else {
+        // Log other types of errors
+        console.error('Error sharing:', error);
+      }
     }
   };
 
