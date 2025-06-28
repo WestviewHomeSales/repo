@@ -138,6 +138,38 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
     });
   };
 
+  // Format the sold date for display - handle MM/DD/YYYY format from Supabase
+  const formatSoldDate = (dateString: string): string => {
+    if (!dateString) return 'Invalid Date';
+    
+    try {
+      let date: Date;
+      
+      // Check if the date is in MM/DD/YYYY format (from Supabase)
+      if (dateString.includes('/')) {
+        const [month, day, year] = dateString.split('/');
+        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      } else {
+        // Handle other formats or ISO dates
+        date = new Date(dateString + 'T12:00:00');
+      }
+      
+      // Check if the date is valid
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+      }
+      
+      return date.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+      });
+    } catch (error) {
+      console.error('Error formatting sold date:', error, 'Date string:', dateString);
+      return 'Invalid Date';
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
       <div className="relative">
@@ -159,7 +191,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
         {/* Show sold date in green tag on Sold page */}
         {isSoldPage && property.soldDate && (
           <div className="absolute top-4 right-4 bg-green-600 text-white px-2 py-1 rounded text-xs">
-            Sold: {new Date(property.soldDate + 'T12:00:00').toLocaleDateString()}
+            Sold: {formatSoldDate(property.soldDate)}
           </div>
         )}
       </div>
