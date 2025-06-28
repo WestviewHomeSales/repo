@@ -234,22 +234,26 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
         {/* Current Listings page layout */}
         {!isSoldPage && (
           <>
-            {/* Listed by and Floor Plan row */}
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-xs text-gray-600">
-                Listed by: <span className="font-medium">{property.listedBy}</span>
-              </span>
-              {showFloorPlanButton && (
+            {/* Listed by and Floor Plan in separate rows */}
+            <div className="mb-4">
+              <div className="mb-2">
                 <span className="text-xs text-gray-600">
-                  Floor Plan: <a 
-                    href={getFloorPlanUrl(modelName)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-medium text-blue-600 hover:underline"
-                  >
-                    {modelName}
-                  </a>
+                  Listed by: <span className="font-medium">{property.listedBy}</span>
                 </span>
+              </div>
+              {showFloorPlanButton && (
+                <div>
+                  <span className="text-sm text-gray-600">
+                    Floor Plan: <a 
+                      href={getFloorPlanUrl(modelName)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-blue-600 hover:underline"
+                    >
+                      {modelName}
+                    </a>
+                  </span>
+                </div>
               )}
             </div>
 
