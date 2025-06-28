@@ -63,27 +63,11 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
   const detailsUrl = property.moreDetailsUrl || '#';
   const galleryUrl = property.photoGalleryUrl || '#';
 
-  // Format the listed date for display
+  // Format the listed date for display - since we don't have actual listing dates from the database,
+  // we'll show "Active Listing" instead of a fake date
   const formatListedDate = (dateString: string): string => {
-    if (!dateString) return 'Listed';
-    
-    try {
-      const date = new Date(dateString);
-      
-      // Check if the date is valid
-      if (isNaN(date.getTime())) {
-        return 'Listed';
-      }
-      
-      return date.toLocaleDateString('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric'
-      });
-    } catch (error) {
-      console.error('Error formatting listed date:', error, 'Date string:', dateString);
-      return 'Listed';
-    }
+    // Since the database doesn't have actual listing dates, don't show a fake date
+    return 'Active Listing';
   };
 
   // Format the sold date for display - handle MM/DD/YYYY format from Supabase
@@ -130,10 +114,10 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
             target.src = 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg';
           }}
         />
-        {/* Show date listed on Current Listings page */}
+        {/* Show "Active Listing" on Current Listings page since we don't have actual listing dates */}
         {!isSoldPage && (
           <div className="absolute top-4 left-4 bg-green-600 text-white px-2 py-1 rounded text-xs font-medium">
-            Listed: {formatListedDate(property.listedDate)}
+            {formatListedDate(property.listedDate)}
           </div>
         )}
         {/* Show sold date in green tag on Sold page */}
