@@ -19,7 +19,7 @@ interface Neighborhood {
 
 const FloorPlanCard: React.FC<{ plan: FloorPlan }> = ({ plan }) => {
   return (
-    <div className="bg-white p-4 rounded-md shadow-md">
+    <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
       <h3 className="text-lg font-semibold mb-4">{plan.name}</h3>
       <div className="grid grid-cols-3 gap-3 mb-4 text-center">
         <div className="flex flex-col items-center">
