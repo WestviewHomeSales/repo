@@ -20,15 +20,16 @@ export interface SoldPropertyData {
 
 export interface ActivePropertyData {
   ID: number
-  "Date Sold": string | null
+  "Date Listed": string | null
   "List Price": string
-  "Sold Price": string | null
   Address: string
   "Square Feet": string
   Model: string
   Beds: number
   Baths: number
   Status: string
+  "More Details URL": string | null
+  "Photo Gallery URL": string | null
 }
 
 export async function fetchSoldProperties(): Promise<SoldPropertyData[]> {
@@ -77,6 +78,7 @@ export async function fetchActiveProperties(): Promise<ActivePropertyData[]> {
     }
 
     console.log(`Fetched ${data?.length || 0} active properties`)
+    console.log('Sample active property data:', data?.[0])
     return data || []
   } catch (error) {
     console.error('Error fetching active properties:', error)

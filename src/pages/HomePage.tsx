@@ -32,6 +32,13 @@ export const HomePage: React.FC = () => {
       const data = await fetchActiveProperties();
       console.log('Raw active data from Supabase:', data);
       
+      if (data.length === 0) {
+        console.log('No data returned from Supabase');
+        setActiveProperties([]);
+        setSortedProperties([]);
+        return;
+      }
+      
       const mappedProperties = data.map(mapActivePropertyToProperty);
       console.log('Mapped active properties:', mappedProperties);
       
@@ -137,7 +144,9 @@ export const HomePage: React.FC = () => {
       </div>
 
       <div className="mb-6 md:mb-8">
-        <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">Current Listings</h2>
+        <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">
+          Current Listings ({activeProperties.length} properties)
+        </h2>
         
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
           <div className="flex items-center text-xs md:text-sm text-gray-600">

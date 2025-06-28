@@ -56,19 +56,33 @@ export function mapSoldPropertyToProperty(soldProperty: SoldPropertyData): Prope
 }
 
 export function mapActivePropertyToProperty(activeProperty: ActivePropertyData): Property {
-  // Generate a unique ID based on address and ID
+  console.log('Mapping active property:', activeProperty)
+  
+  // Use the ID from the database
   const id = activeProperty.ID
 
   // Parse price from string (remove $ and commas)
   const parsePrice = (priceStr: string): number => {
-    if (!priceStr) return 0
-    return parseInt(priceStr.replace(/[$,]/g, '')) || 0
+    if (!priceStr) {
+      console.log('No price string provided:', priceStr)
+      return 0
+    }
+    const cleaned = priceStr.replace(/[$,]/g, '')
+    const parsed = parseInt(cleaned) || 0
+    console.log(`Parsing price: "${priceStr}" -> "${cleaned}" -> ${parsed}`)
+    return parsed
   }
 
   // Parse square feet from string
   const parseSqFt = (sqFtStr: string): number => {
-    if (!sqFtStr) return 0
-    return parseInt(sqFtStr.replace(/[,]/g, '')) || 0
+    if (!sqFtStr) {
+      console.log('No sqft string provided:', sqFtStr)
+      return 0
+    }
+    const cleaned = sqFtStr.replace(/[,]/g, '')
+    const parsed = parseInt(cleaned) || 0
+    console.log(`Parsing sqft: "${sqFtStr}" -> "${cleaned}" -> ${parsed}`)
+    return parsed
   }
 
   // Map model name to image URL
@@ -80,8 +94,20 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
 
   // Determine builder based on model name or other criteria
   const getBuilder = (model: string): string => {
-    // You can add logic here to determine builder based on model name
-    // For now, we'll use a default
+    if (!model) return 'Westview Builder'
+    
+    // Map specific models to builders
+    const lennarModels = ['Sanibel', 'Siesta', 'Venice', 'Ventura', 'Amalfi', 'Minori', 'Sienna', 'Atlanta', 'Columbia', 'Concord', 'Annapolis', 'Boston', 'Belmont', 'Columbus', 'Edison', 'Georgia', 'Jefferson', 'Bloom', 'Celeste', 'Dawn', 'Eclipse', 'Aspen', 'Discovery', 'Dover', 'Hartford', 'Miramar', 'Sutton']
+    const taylorMorrisonModels = ['Anastasia', 'Aruba', 'Barbados', 'Bermuda', 'BocaGrande', 'Captiva', 'Grenada', 'SaintThomas', 'SaintVincent', 'SantaRosa', 'Ambrosia', 'Azalea', 'Cypress', 'Elm', 'Holly', 'Magnolia', 'Maple', 'Redbud', 'Sherwood', 'Spruce', 'Ambra', 'Azzurro', 'Farnese', 'Lazio', 'Letizia', 'Pallazio', 'Hazel', 'Ivy', 'Jasmine', 'Marigold']
+    
+    const cleanModel = model.replace(/\s+/g, '')
+    
+    if (lennarModels.includes(cleanModel)) {
+      return 'Lennar'
+    } else if (taylorMorrisonModels.includes(cleanModel)) {
+      return 'Taylor Morrison'
+    }
+    
     return 'Westview Builder'
   }
 
@@ -89,10 +115,22 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
   const sqFt = parseSqFt(activeProperty["Square Feet"])
   const pricePerSqFt = sqFt > 0 ? Math.round(price / sqFt) : 0
 
-  // Use current date as listed date if not available
-  const currentDate = new Date().toISOString().split('T')[0]
+  // Parse the date listed or use current date
+  let listedDate = new Date().toISOString().split('T')[0] // Default to today
+  
+  if (activeProperty["Date Listed"]) {
+    try {
+      // Try to parse the date from the database
+      const parsedDate = new Date(activeProperty["Date Listed"])
+      if (!isNaN(parsedDate.getTime())) {
+        listedDate = parsedDate.toISOString().split('T')[0]
+      }
+    } catch (error) {
+      console.log('Error parsing date listed:', error)
+    }
+  }
 
-  return {
+  const mappedProperty: Property = {
     id,
     status: 'ACTIVE',
     imageUrl: getImageUrl(activeProperty.Model),
@@ -108,7 +146,13 @@ export function mapActivePropertyToProperty(activeProperty: ActivePropertyData):
     yearBuilt: 2025, // Default year for active properties
     lotSize: 0.05, // Default lot size
     listedBy: getBuilder(activeProperty.Model),
-    listedDate: currentDate, // Use current date as default
-    propertyType: 'Single Family'
+    listedDate,
+    propertyType: 'Single Family',
+    // Store the URLs from Supabase for use in PropertyCard
+    moreDetailsUrl: activeProperty["More Details URL"] || '',
+    photoGalleryUrl: activeProperty["Photo Gallery URL"] || ''
   }
+
+  console.log('Mapped property result:', mappedProperty)
+  return mappedProperty
 }

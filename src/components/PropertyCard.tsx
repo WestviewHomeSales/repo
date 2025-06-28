@@ -44,9 +44,9 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
     return availableFloorPlans.includes(cleanModelName);
   };
 
-  // Extract model name from listedBy or use a default
+  // Extract model name from the image URL or listedBy
   const getModelName = (): string => {
-    // For sold properties, try to extract model from the image URL or other sources
+    // Try to extract model from the image URL
     if (property.imageUrl && property.imageUrl.includes('/models/')) {
       const modelFromUrl = property.imageUrl.split('/models/')[1]?.split('.')[0];
       if (modelFromUrl) return modelFromUrl;
@@ -56,9 +56,17 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
     return '';
   };
 
-  // Generate IDX URLs based on property address and known listing IDs
-  const generateIdxUrls = () => {
-    // Create a URL-friendly version of the address
+  // Use URLs from Supabase if available, otherwise generate fallback URLs
+  const getPropertyUrls = () => {
+    // If we have URLs from Supabase, use them
+    if (property.moreDetailsUrl && property.photoGalleryUrl) {
+      return {
+        detailsUrl: property.moreDetailsUrl,
+        galleryUrl: property.photoGalleryUrl
+      };
+    }
+
+    // Fallback: Generate IDX URLs based on property address and known listing IDs
     const addressSlug = property.address
       .toLowerCase()
       .replace(/\s+/g, '-')
@@ -66,51 +74,51 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
     
     // Map specific addresses to their actual IDX listing IDs
     const addressToListingId: { [key: string]: string } = {
-      '4560 ochos rios place': 'O6318335',
-      '4333 curacao place': 'O6318336',
-      '4335 curacao place': 'O6318337',
-      '4596 ochos rios place': 'O6318338',
-      '4541 ochos rios place': 'O6318339',
-      '5709 gingham drive': 'O6318340',
-      '5687 portico place': 'O6318341',
-      '5663 portico place': 'O6318342',
-      '4548 ochos rios place': 'O6318343',
-      '5626 portico place': 'O6318344',
-      '5637 gingham drive': 'O6318345',
-      '4725 yellow elder way': 'O6318346',
-      '5733 gingham drive': 'O6318347',
-      '4724 cloister street': 'O6318348',
-      '4742 yellow elder way': 'O6318349',
-      '5658 nevis terrace': 'O6318350',
-      '5652 nevis terrace': 'O6318351',
-      '5653 nevis terrace': 'O6318352',
-      '4204 barbuda lane': 'O6318353',
-      '4210 barbuda lane': 'O6318354',
-      '4215 barbuda lane': 'O6318355',
-      '4209 barbuda lane': 'O6318356',
-      '4197 barbuda lane': 'O6318357',
-      '4740 cloister street': 'O6318358',
-      '5642 gingham drive': 'O6318359',
-      '3184 skyline loop': 'O6318360',
-      '2081 viewfinder street': 'O6318361',
-      '5629 gingham drive': 'O6318362',
-      '4572 ochos rios place': 'O6318363',
-      '4147 coral harbour road': 'O6318364',
-      '2414 skyline loop': 'O6318365',
-      '4578 ochos rios place': 'O6318366',
-      '4192 barbuda lane': 'O6318367',
-      '4198 barbuda lane': 'O6318368',
-      '5646 nevis terrace': 'O6318369',
-      '5640 nevis terrace': 'O6318370',
-      '5641 nevis terrace': 'O6318371',
-      '4672 ackee road': 'O6318372',
-      '2671 skyline loop': 'O6318373',
-      '3056 skyline loop': 'O6318374',
-      '2208 portrait street': 'O6318375',
-      '3064 skyline loop': 'O6318376',
-      '3060 skyline loop': 'O6318377',
-      '4654 ackee road': 'O6318378',
-      '2633 skyline loop': 'O6318379'
+      '4560-ochos-rios-place': 'O6318335',
+      '4333-curacao-place': 'O6318336',
+      '4335-curacao-place': 'O6318337',
+      '4596-ochos-rios-place': 'O6318338',
+      '4541-ochos-rios-place': 'O6318339',
+      '5709-gingham-drive': 'O6318340',
+      '5687-portico-place': 'O6318341',
+      '5663-portico-place': 'O6318342',
+      '4548-ochos-rios-place': 'O6318343',
+      '5626-portico-place': 'O6318344',
+      '5637-gingham-drive': 'O6318345',
+      '4725-yellow-elder-way': 'O6318346',
+      '5733-gingham-drive': 'O6318347',
+      '4724-cloister-street': 'O6318348',
+      '4742-yellow-elder-way': 'O6318349',
+      '5658-nevis-terrace': 'O6318350',
+      '5652-nevis-terrace': 'O6318351',
+      '5653-nevis-terrace': 'O6318352',
+      '4204-barbuda-lane': 'O6318353',
+      '4210-barbuda-lane': 'O6318354',
+      '4215-barbuda-lane': 'O6318355',
+      '4209-barbuda-lane': 'O6318356',
+      '4197-barbuda-lane': 'O6318357',
+      '4740-cloister-street': 'O6318358',
+      '5642-gingham-drive': 'O6318359',
+      '3184-skyline-loop': 'O6318360',
+      '2081-viewfinder-street': 'O6318361',
+      '5629-gingham-drive': 'O6318362',
+      '4572-ochos-rios-place': 'O6318363',
+      '4147-coral-harbour-road': 'O6318364',
+      '2414-skyline-loop': 'O6318365',
+      '4578-ochos-rios-place': 'O6318366',
+      '4192-barbuda-lane': 'O6318367',
+      '4198-barbuda-lane': 'O6318368',
+      '5646-nevis-terrace': 'O6318369',
+      '5640-nevis-terrace': 'O6318370',
+      '5641-nevis-terrace': 'O6318371',
+      '4672-ackee-road': 'O6318372',
+      '2671-skyline-loop': 'O6318373',
+      '3056-skyline-loop': 'O6318374',
+      '2208-portrait-street': 'O6318375',
+      '3064-skyline-loop': 'O6318376',
+      '3060-skyline-loop': 'O6318377',
+      '4654-ackee-road': 'O6318378',
+      '2633-skyline-loop': 'O6318379'
     };
     
     // Get the listing ID for this property
@@ -125,17 +133,25 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, isSoldPage
 
   const modelName = getModelName();
   const showFloorPlanButton = modelName && hasFloorPlan(modelName);
-  const { detailsUrl, galleryUrl } = generateIdxUrls();
+  const { detailsUrl, galleryUrl } = getPropertyUrls();
 
   // Format the listed date for display - fix timezone issue
   const formatListedDate = (dateString: string): string => {
-    // Parse as local date to avoid timezone conversion issues
-    const date = new Date(dateString + 'T12:00:00');
-    return date.toLocaleDateString('en-US', {
-      month: '2-digit',
-      day: '2-digit',
-      year: 'numeric'
-    });
+    try {
+      // Parse as local date to avoid timezone conversion issues
+      const date = new Date(dateString + 'T12:00:00');
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+      }
+      return date.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+      });
+    } catch (error) {
+      console.error('Error formatting listed date:', error);
+      return 'Invalid Date';
+    }
   };
 
   // Format the sold date for display - handle MM/DD/YYYY format from Supabase

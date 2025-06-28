@@ -17,4 +17,7 @@ export interface Property {
   listedDate: string;
   soldDate?: string;
   propertyType?: 'Single Family' | 'Townhouse';
+  // Add URLs from Supabase
+  moreDetailsUrl?: string;
+  photoGalleryUrl?: string;
 }
