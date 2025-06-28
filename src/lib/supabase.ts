@@ -3,16 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-// Only create client if environment variables are properly set
-let supabase: any = null;
-
-if (supabaseUrl && supabaseAnonKey && supabaseUrl !== 'your_supabase_url_here' && supabaseAnonKey !== 'your_supabase_anon_key_here') {
-  supabase = createClient(supabaseUrl, supabaseAnonKey);
-} else {
-  console.warn('Supabase environment variables not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.');
-}
-
-export { supabase }
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 export interface SoldPropertyData {
   ID: number
@@ -32,11 +23,6 @@ export interface ActivePropertyData {
 }
 
 export async function fetchSoldProperties(): Promise<SoldPropertyData[]> {
-  if (!supabase) {
-    console.error('Supabase client not initialized. Please check your environment variables.');
-    return [];
-  }
-
   try {
     console.log('Fetching sold properties from Supabase...')
     
@@ -69,11 +55,6 @@ export async function fetchSoldProperties(): Promise<SoldPropertyData[]> {
 }
 
 export async function fetchActiveProperties(): Promise<ActivePropertyData[]> {
-  if (!supabase) {
-    console.error('Supabase client not initialized. Please check your environment variables.');
-    return [];
-  }
-
   try {
     console.log('🔍 Fetching active properties from Supabase westviewactive table...')
     
